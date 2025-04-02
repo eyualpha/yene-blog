@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import UserProfile from "./pages/UserProfile";
 import Auth from "./components/Auth";
-import PrivateRoute from "./components/PrivateRoute"; // Import PrivateRoute
+import PrivateRoute from "./components/PrivateRoute";
+import BlogDetail from "./pages/BlogDetail";
 
 const App = () => {
   return (
@@ -20,6 +21,14 @@ const App = () => {
             }
           />
           <Route path="/auth" element={<Auth />} />
+          <Route
+            path="/blog/:id"
+            element={
+              <PrivateRoute>
+                <BlogDetail />
+              </PrivateRoute>
+            }
+          />
         </Routes>
       </Router>
     </div>

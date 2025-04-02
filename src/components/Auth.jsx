@@ -8,10 +8,10 @@ import {
 } from "firebase/auth";
 
 const Auth = () => {
-  const navigate = useNavigate(); // Moved inside the component
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(""); // Added error state
+  const [error, setError] = useState("");
 
   const signInWithGoogle = async () => {
     try {
@@ -51,7 +51,7 @@ const Auth = () => {
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
       <h1 className="text-2xl font-bold mb-4">Authentication</h1>
-      {error && <p className="text-red-500">{error}</p>} {/* Display error */}
+      {error && <p className="text-red-500">{error}</p>}
       <input
         type="email"
         placeholder="Email"
