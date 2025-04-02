@@ -11,6 +11,10 @@ const UserProfile = () => {
   const blogCollectionRef = collection(db, "blogs");
 
   const addBlog = async () => {
+    if (!title || !detail) {
+      alert("Please fill in all fields.");
+      return;
+    }
     try {
       await addDoc(blogCollectionRef, {
         title: title,
@@ -31,6 +35,10 @@ const UserProfile = () => {
     <div>
       <h1>User Profile</h1>
       <p>Welcome to your profile!</p>
+      <p>Your email: {auth.currentUser.email}</p>
+      <p>Your name: {auth.currentUser.displayName}</p>
+      <p>Your UID: {auth.currentUser.uid}</p>
+      <img src={auth.currentUser.photoURL} alt="" />
 
       <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
         <input
