@@ -6,7 +6,12 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import { logOut } from "../context/AuthContext";
+// import {
+//   logOut,
+//   signInWithGoogle,
+//   signInWithPassword,
+//   error,
+// } from "../context/AuthContext";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -16,7 +21,6 @@ const Auth = () => {
 
   const signInWithGoogle = async () => {
     try {
-      console.log(auth, password);
       await signInWithPopup(auth, googleProvider);
       navigate("/");
     } catch (err) {
@@ -39,15 +43,15 @@ const Auth = () => {
     }
   };
 
-  // const logOut = async () => {
-  //   try {
-  //     await signOut(auth);
-  //     navigate("/");
-  //   } catch (err) {
-  //     setError("Failed to log out.");
-  //     console.log(err);
-  //   }
-  // };
+  const logOut = async () => {
+    try {
+      await signOut(auth);
+      navigate("/");
+    } catch (err) {
+      setError("Failed to log out.");
+      console.log(err);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">

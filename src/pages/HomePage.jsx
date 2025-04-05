@@ -10,6 +10,7 @@ import {
 } from "firebase/firestore";
 import { Link, useNavigate } from "react-router-dom";
 import { logOut } from "../context/AuthContext";
+import BlogCard from "../components/BlogCard";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -90,41 +91,7 @@ const HomePage = () => {
       )}
 
       <p className="mt-4">Here are the latest blogs:</p>
-      <div className="mt-4">
-        {blogList.map((blog) => (
-          <div key={blog.id} className="border p-4 mb-4 rounded w-md">
-            <Link to={`/blog/${blog.id}`} key={blog.id}>
-              <div className="flex items-center mt-2">
-                <img
-                  src={blog.authorPhoto}
-                  alt={blog.author}
-                  className="w-8 h-8 rounded-full mr-2"
-                />
-                <p className="text-gray-700 font-semibold">{blog.author}</p>
-              </div>
-              <h2 className="text-xl font-semibold">{blog.title}</h2>
-              <p>{blog.detail}</p>
-              <p className="text-gray-500">
-                {new Date(blog.createdAt).toLocaleString()}
-              </p>
-            </Link>
-            <button
-              onClick={() => handleLike(blog.id)}
-              className="cursor-pointer flex items-center"
-            >
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/1077/1077035.png"
-                alt="like"
-                className="w-6 h-6"
-              />
-              <span className="text-gray-700 font-semibold ml-2">
-                {blog.likes}
-              </span>
-            </button>
-            <p className="text-gray-500 text-sm">Likes: {blog.likes}</p>
-          </div>
-        ))}
-      </div>
+      <BlogCard blogList={blogList} handleLike={handleLike} />
     </div>
   );
 };

@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { auth } from "../config/firebase";
 import { db } from "../config/firebase";
 import { collection, addDoc, onSnapshot } from "firebase/firestore";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import BlogCard from "../components/BlogCard";
 
 const UserProfile = () => {
   const [title, setTitle] = useState("");
@@ -61,31 +62,12 @@ const UserProfile = () => {
       <p>Welcome to your profile!</p>
       <p>Your email: {auth.currentUser.email}</p>
       <p>Your name: {auth.currentUser.displayName}</p>
-      <p>Your UID: {auth.currentUser.uid}</p>
       <img src={auth.currentUser.photoURL} alt="" />
 
       <h2 className="text-2xl font-bold">Your Blogs</h2>
       <div className="mt-4 flex flex-wrap gap-4">
         {userBlogList.length > 0 ? (
-          userBlogList.map((blog) => (
-            <Link to={`/blog/${blog.id}`} key={blog.id}>
-              <div key={blog.id} className="border p-4 mb-4 rounded w-md">
-                <div className="flex items-center mt-2">
-                  <img
-                    src={blog.authorPhoto}
-                    alt={blog.author}
-                    className="w-8 h-8 rounded-full mr-2"
-                  />
-                  <p className="text-gray-700 font-semibold">{blog.author}</p>
-                </div>
-                <h2 className="text-xl font-semibold">{blog.title}</h2>
-                <p>{blog.detail}</p>
-                <p className="text-gray-500">
-                  {new Date(blog.createdAt).toLocaleString()}
-                </p>
-              </div>
-            </Link>
-          ))
+          <BlogCard blogList={userBlogList} />
         ) : (
           <p>No blogs found for this user.</p>
         )}
