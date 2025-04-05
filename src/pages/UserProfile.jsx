@@ -51,6 +51,8 @@ const UserProfile = () => {
     } catch (error) {
       console.error("Error adding blog: ", error);
     }
+    setTitle("");
+    setDetail("");
   };
 
   return (
@@ -78,7 +80,6 @@ const UserProfile = () => {
                 </div>
                 <h2 className="text-xl font-semibold">{blog.title}</h2>
                 <p>{blog.detail}</p>
-                <p>{blog.id}</p>
                 <p className="text-gray-500">
                   {new Date(blog.createdAt).toLocaleString()}
                 </p>

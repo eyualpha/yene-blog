@@ -9,6 +9,7 @@ import {
   arrayRemove,
 } from "firebase/firestore";
 import { Link, useNavigate } from "react-router-dom";
+import { logOut } from "../context/AuthContext";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -67,6 +68,27 @@ const HomePage = () => {
     <div>
       <h1 className="text-3xl font-bold">Welcome to the Home Page</h1>
       <button onClick={() => navigate("/profile")}>Add Blog</button>
+      {auth.currentUser ? (
+        <div className="flex items-center mt-4">
+          <img
+            src={auth.currentUser.photoURL}
+            alt={auth.currentUser.displayName}
+            className="w-8 h-8 rounded-full mr-2"
+          />
+          <p className="mt-4">Welcome, {auth.currentUser.displayName}</p>
+          <button className=" bg-red-500 text-white" onClick={logOut}>
+            Log Out
+          </button>
+        </div>
+      ) : (
+        <button
+          className=" bg-red-500 text-white"
+          onClick={() => navigate("/auth")}
+        >
+          Log In
+        </button>
+      )}
+
       <p className="mt-4">Here are the latest blogs:</p>
       <div className="mt-4">
         {blogList.map((blog) => (
@@ -82,7 +104,6 @@ const HomePage = () => {
               </div>
               <h2 className="text-xl font-semibold">{blog.title}</h2>
               <p>{blog.detail}</p>
-              <p>{blog.id}</p>
               <p className="text-gray-500">
                 {new Date(blog.createdAt).toLocaleString()}
               </p>
