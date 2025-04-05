@@ -1,14 +1,35 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { auth } from "../config/firebase";
 import { db } from "../config/firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, onSnapshot } from "firebase/firestore";
+import { useNavigate, Link } from "react-router-dom";
 
 const UserProfile = () => {
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
+  const navigate = useNavigate();
+  const [blogList, setBlogList] = useState([]);
+  const [userBlogList, setUserBlogList] = useState([]);
 
-  const blogCollectionRef = collection(db, "blogs");
+  const BlogCollectionRef = collection(db, "blogs");
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(BlogCollectionRef, (snapshot) => {
+      const blogs = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setBlogList(blogs);
+
+      const userBlogs = blogs.filter(
+        (blog) => blog.userId === auth.currentUser.uid
+      );
+      setUserBlogList(userBlogs);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const addBlog = async () => {
     if (!title || !detail) {
@@ -16,14 +37,15 @@ const UserProfile = () => {
       return;
     }
     try {
-      await addDoc(blogCollectionRef, {
+      await addDoc(BlogCollectionRef, {
         title: title,
         detail: detail,
         userId: auth.currentUser.uid,
         createdAt: new Date().toISOString(),
-        like: 0,
+        likes: 0,
         author: auth.currentUser.displayName,
         authorId: auth.currentUser.uid,
+        authorPhoto: auth.currentUser.photoURL,
       });
       console.log("Blog added successfully!");
     } catch (error) {
@@ -40,7 +62,36 @@ const UserProfile = () => {
       <p>Your UID: {auth.currentUser.uid}</p>
       <img src={auth.currentUser.photoURL} alt="" />
 
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+      <h2 className="text-2xl font-bold">Your Blogs</h2>
+      <div className="mt-4 flex flex-wrap gap-4">
+        {userBlogList.length > 0 ? (
+          userBlogList.map((blog) => (
+            <Link to={`/blog/${blog.id}`} key={blog.id}>
+              <div key={blog.id} className="border p-4 mb-4 rounded w-md">
+                <div className="flex items-center mt-2">
+                  <img
+                    src={blog.authorPhoto}
+                    alt={blog.author}
+                    className="w-8 h-8 rounded-full mr-2"
+                  />
+                  <p className="text-gray-700 font-semibold">{blog.author}</p>
+                </div>
+                <h2 className="text-xl font-semibold">{blog.title}</h2>
+                <p>{blog.detail}</p>
+                <p>{blog.id}</p>
+                <p className="text-gray-500">
+                  {new Date(blog.createdAt).toLocaleString()}
+                </p>
+              </div>
+            </Link>
+          ))
+        ) : (
+          <p>No blogs found for this user.</p>
+        )}
+      </div>
+      <h2 className="text-2xl font-bold">Add New Blog</h2>
+
+      <div className="flex flex-col w-lg  bg-gray-100">
         <input
           type="text"
           value={title}

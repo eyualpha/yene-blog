@@ -21,14 +21,7 @@ const App = () => {
             }
           />
           <Route path="/auth" element={<Auth />} />
-          <Route
-            path="/blog/:id"
-            element={
-              <PrivateRoute>
-                <BlogDetail />
-              </PrivateRoute>
-            }
-          />
+          <Route path="/blog/:id" element={<BlogDetail />} />
         </Routes>
       </Router>
     </div>

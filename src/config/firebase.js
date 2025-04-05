@@ -5,13 +5,13 @@ import { getFirestore } from "firebase/firestore";
 import { GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBLFE2mALlYGR2nWEXgadcwa3r3EmUTnuM",
-  authDomain: "yene-blog.firebaseapp.com",
-  projectId: "yene-blog",
-  storageBucket: "yene-blog.firebasestorage.app",
-  messagingSenderId: "949462630883",
-  appId: "1:949462630883:web:2419c823912b746bc8a0d6",
-  measurementId: "G-X8W4N05RRS",
+  apiKey: import.meta.env.VITE_API_KEY,
+  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_ID,
+  measurementId: import.meta.env.VITE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);

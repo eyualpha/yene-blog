@@ -17,7 +17,7 @@ const Auth = () => {
     try {
       console.log(auth, password);
       await signInWithPopup(auth, googleProvider);
-      navigate("/profile");
+      navigate("/");
     } catch (err) {
       setError("Failed to sign in with Google.");
       console.log(err);
@@ -31,7 +31,7 @@ const Auth = () => {
     }
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      navigate("/profile");
+      navigate("/");
     } catch (err) {
       setError("Failed to sign in with email and password.");
       console.log(err);
