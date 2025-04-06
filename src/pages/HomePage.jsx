@@ -66,32 +66,33 @@ const HomePage = () => {
   };
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold">Welcome to the Home Page</h1>
-      <button onClick={() => navigate("/profile")}>Add Blog</button>
-      {auth.currentUser ? (
-        <div className="flex items-center mt-4">
-          <img
-            src={auth.currentUser.photoURL}
-            alt={auth.currentUser.displayName}
-            className="w-8 h-8 rounded-full mr-2"
-          />
-          <p className="mt-4">Welcome, {auth.currentUser.displayName}</p>
-          <button className=" bg-red-500 text-white" onClick={logOut}>
-            Log Out
+    <div className=" w-full  bg-[#191919] text-white">
+      <div className="max-w-[1240px] mx-auto flex flex-col items-center justify-center">
+        {auth.currentUser ? (
+          <div className="flex items-center mt-4">
+            <img
+              src={auth.currentUser.photoURL}
+              alt={auth.currentUser.displayName}
+              className="w-8 h-8 rounded-full mr-2"
+            />
+            <p className="mt-4">Welcome, {auth.currentUser.displayName}</p>
+            <button className=" bg-red-500 text-white" onClick={logOut}>
+              Log Out
+            </button>
+          </div>
+        ) : (
+          <button
+            className=" bg-red-500 text-white"
+            onClick={() => navigate("/auth")}
+          >
+            Log In
           </button>
-        </div>
-      ) : (
-        <button
-          className=" bg-red-500 text-white"
-          onClick={() => navigate("/auth")}
-        >
-          Log In
-        </button>
-      )}
+        )}
 
-      <p className="mt-4">Here are the latest blogs:</p>
-      <BlogCard blogList={blogList} handleLike={handleLike} />
+        <button onClick={() => navigate("/profile")}>Add Blog</button>
+        <p className="mt-4">Here are the latest blogs:</p>
+        <BlogCard blogList={blogList} handleLike={handleLike} />
+      </div>
     </div>
   );
 };

@@ -5,11 +5,13 @@ import UserProfile from "./pages/UserProfile";
 import Auth from "./components/Auth";
 import PrivateRoute from "./components/PrivateRoute";
 import BlogDetail from "./pages/BlogDetail";
+import NavBar from "./components/NavBar";
 
 const App = () => {
   return (
     <div>
       <Router>
+        <NavBar />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route
