@@ -66,31 +66,30 @@ const HomePage = () => {
   };
 
   return (
-    <div className=" w-full  bg-[#191919] text-white">
-      <div className="max-w-[1240px] mx-auto flex flex-col items-center justify-center">
-        {auth.currentUser ? (
-          <div className="flex items-center mt-4">
-            <img
-              src={auth.currentUser.photoURL}
-              alt={auth.currentUser.displayName}
-              className="w-8 h-8 rounded-full mr-2"
-            />
-            <p className="mt-4">Welcome, {auth.currentUser.displayName}</p>
-            <button className=" bg-red-500 text-white" onClick={logOut}>
-              Log Out
-            </button>
-          </div>
-        ) : (
+    <div className=" w-full  bg-[#191919] text-white pt-15">
+      <div className="max-w-[1440px] mx-auto flex flex-col items-center justify-center px-4">
+        <div className="flex flex-col items-center justify-center text-center mt-10 h-[70vh] gap-8">
+          <p className="text-gray-400 text-2xl mb-2 font-bold">
+            Begin your journey toward deeper knowledge and meaningful insights
+            here.
+          </p>
+          <h1 className="text-7xl font-bold mb-4">
+            Discover Fresh Insights, Stories, and Ideas — Dive into Our Latest
+            Blogs.
+          </h1>
+          <p className="text-gray-400 text-3xl mb-2 w-4xl ">
+            Explore articles crafted by passionate writers and creators. From
+            deep tech dives to everyday insights — there’s something for every
+            curious mind.
+          </p>
           <button
-            className=" bg-red-500 text-white"
-            onClick={() => navigate("/auth")}
+            onClick={() => navigate("/profile")}
+            className=" text-black bg-white hover:bg-gray-300 px-4 py-2 rounded-lg transition duration-300 text-2xl "
           >
-            Log In
+            Publish Your Blog
           </button>
-        )}
-
-        <button onClick={() => navigate("/profile")}>Add Blog</button>
-        <p className="mt-4">Here are the latest blogs:</p>
+        </div>
+        <p className=" text-5xl self-start">Explore Our Latest Blogs</p>
         <BlogCard blogList={blogList} handleLike={handleLike} />
       </div>
     </div>

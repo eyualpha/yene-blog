@@ -47,6 +47,7 @@ const UserProfile = () => {
         author: auth.currentUser.displayName,
         authorId: auth.currentUser.uid,
         authorPhoto: auth.currentUser.photoURL,
+        authorEmail: auth.currentUser.email,
       });
       console.log("Blog added successfully!");
     } catch (error) {
@@ -57,44 +58,44 @@ const UserProfile = () => {
   };
 
   return (
-    <div>
-      <h1>User Profile</h1>
-      <p>Welcome to your profile!</p>
-      <p>Your email: {auth.currentUser.email}</p>
-      <p>Your name: {auth.currentUser.displayName}</p>
-      <img src={auth.currentUser.photoURL} alt="" />
+    <div className="flex flex-col items-center w-full bg-[#191919] text-white p-4 min-h-screen py-22">
+      <div className=" max-w-[1440px] mx-auto flex flex-col items-center justify-center px-4">
+        <p className="text-lg font-semibold my-2">
+          Welcome, <strong>{auth.currentUser.displayName}</strong>
+        </p>
 
-      <h2 className="text-2xl font-bold">Your Blogs</h2>
-      <div className="mt-4 flex flex-wrap gap-4">
-        {userBlogList.length > 0 ? (
-          <BlogCard blogList={userBlogList} />
-        ) : (
-          <p>No blogs found for this user.</p>
-        )}
-      </div>
-      <h2 className="text-2xl font-bold">Add New Blog</h2>
+        <h2 className="text-2xl font-bold my-4">Add New Blog</h2>
 
-      <div className="flex flex-col w-lg  bg-gray-100">
-        <input
-          type="text"
-          value={title}
-          placeholder="title"
-          onChange={(e) => setTitle(e.target.value)}
-          className=" border border-gray-300 rounded my-2 p-2"
-        />
-        <input
-          type="text"
-          value={detail}
-          placeholder="detail"
-          onChange={(e) => setDetail(e.target.value)}
-          className=" border border-gray-300 rounded my-2 p-2"
-        />
-        <button
-          onClick={addBlog}
-          className="bg-blue-500 text-white p-2 rounded"
-        >
-          Add
-        </button>
+        <div className="flex flex-col w-lg mb-4">
+          <input
+            type="text"
+            value={title}
+            placeholder="title"
+            onChange={(e) => setTitle(e.target.value)}
+            className=" border border-gray-300 rounded my-2 p-2"
+          />
+          <input
+            type="text"
+            value={detail}
+            placeholder="detail"
+            onChange={(e) => setDetail(e.target.value)}
+            className=" border border-gray-300 rounded my-2 p-2"
+          />
+          <button
+            onClick={addBlog}
+            className="bg-blue-500 text-white p-2 rounded"
+          >
+            Add
+          </button>
+        </div>
+        <h2 className="text-2xl font-bold my-4">Your Blogs</h2>
+        <div className="mt-4 flex flex-wrap gap-4">
+          {userBlogList.length > 0 ? (
+            <BlogCard blogList={userBlogList} />
+          ) : (
+            <p>No blogs found for this user.</p>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,42 +1,80 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { auth } from "../config/firebase";
 
 const BlogCard = ({ blogList, handleLike }) => {
+  const [likedBlogs, setLikedBlogs] = useState({});
+
+  useEffect(() => {
+    const initialLikedState = {};
+    blogList.forEach((blog) => {
+      if (blog.likedBy && blog.likedBy.includes(auth.currentUser?.uid)) {
+        initialLikedState[blog.id] = true;
+      } else {
+        initialLikedState[blog.id] = false;
+      }
+    });
+    setLikedBlogs(initialLikedState);
+  }, [blogList]);
+
+  const handleLikeClick = (blogId) => {
+    setLikedBlogs((prevState) => ({
+      ...prevState,
+      [blogId]: !prevState[blogId],
+    }));
+
+    handleLike(blogId);
+  };
+
+  const truncateText = (text, maxLength) => {
+    if (text.length > maxLength) {
+      return text.substring(0, maxLength) + "...";
+    }
+    return text;
+  };
+
   return (
-    <div className=" flex p-4 border border-gray-300 rounded-lg bg-white shadow-md gap-4 w-full max-w-7xl flex-wrap justify-center self-center">
+    <div className="w-full flex flex-wrap justify-center items-center gap-4 px-4 py-8">
       {blogList.map((blog) => (
         <div
           key={blog.id}
-          className="border p-4 mb-4 rounded flex flex-col  w-1/3 flex-shrink-0 "
+          className="border border-gray-500 mb-4 p-4 rounded-lg flex flex-col w-[300px] flex-shrink-0 h-[300px] bg-gray-900 hover:scale-105 transition duration-300 ease-in-out"
         >
           <Link to={`/blog/${blog.id}`} key={blog.id}>
-            <div className="flex items-center mt-2">
+            <div className="flex items-center my-2">
               <img
                 src={blog.authorPhoto}
                 alt={blog.author}
                 className="w-8 h-8 rounded-full mr-2"
               />
-              <p className="text-gray-700 font-semibold">{blog.author}</p>
+              <div className="flex flex-col">
+                <p className="text-gray-300 font-semibold">{blog.author}</p>
+                <p className="text-gray-400 text-sm">{blog.authorEmail}</p>
+              </div>
             </div>
-            <h2 className="text-xl font-semibold">{blog.title}</h2>
-            <p>{blog.detail}</p>
-            <p className="text-gray-500">
+            <h2 className="text-2xl font-semibold mb-2">{blog.title}</h2>
+            <p className="text-gray-400">{truncateText(blog.detail, 100)}</p>
+          </Link>
+          <div className="flex justify-between items-center mt-auto z-10">
+            <p className="text-gray-400">
               {new Date(blog.createdAt).toLocaleString()}
             </p>
-          </Link>
-          <button
-            onClick={() => handleLike(blog.id)}
-            className="cursor-pointer flex items-center"
-          >
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/1077/1077035.png"
-              alt="like"
-              className="w-6 h-6"
-            />
-            <span className="text-gray-700 font-semibold ml-2">
-              {blog.likes}
-            </span>
-          </button>
+
+            <button
+              onClick={() => handleLikeClick(blog.id)}
+              className="cursor-pointer flex items-center text-white"
+            >
+              {likedBlogs[blog.id] ? (
+                <FaHeart className="text-red-500" />
+              ) : (
+                <FaRegHeart className="text-gray-400" />
+              )}
+              <span className="text-gray-400 font-semibold ml-2">
+                {blog.likes}
+              </span>
+            </button>
+          </div>
         </div>
       ))}
     </div>

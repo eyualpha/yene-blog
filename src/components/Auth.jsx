@@ -6,6 +6,9 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
+import { FcGoogle } from "react-icons/fc";
+import { MdCheckBox } from "react-icons/md";
+
 // import {
 //   logOut,
 //   signInWithGoogle,
@@ -54,41 +57,42 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-      <h1 className="text-2xl font-bold mb-4">Authentication</h1>
-      {error && <p className="text-red-500">{error}</p>}
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="mb-2 p-2 border border-gray-300 rounded"
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="mb-2 p-2 border border-gray-300 rounded"
-      />
-      <button
-        onClick={() => signInWithPassword(email, password)}
-        className="mb-2 p-2 bg-blue-500 text-white rounded"
-      >
-        Sign In
-      </button>
-      <button
-        onClick={signInWithGoogle}
-        className="mb-2 p-2 bg-red-500 text-white rounded"
-      >
-        Sign In with Google
-      </button>
-      <button
-        onClick={logOut}
-        className="mb-2 p-2 bg-gray-500 text-white rounded"
-      >
-        Log Out
-      </button>
+    <div className="flex flex-col items-center justify-center h-screen bg-[#191919] text-white p-4">
+      <div className="border border-gray-500 p-8 rounded-lg flex flex-col items-center justify-center bg-gray-900 shadow-lg w-full max-w-md">
+        <h1 className="text-2xl font-bold mb-8">Get Started</h1>
+        {error && <p className="text-red-500">{error}</p>}
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="mb-2 p-2 border border-gray-300 rounded w-full"
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="mb-4 p-2 border border-gray-300 rounded w-full"
+        />
+        <div className="">
+          <input type="checkbox" className="mr-2" />
+          <label className="text-gray-300">
+            By creating an account, I confirm that I have read and agree to the
+            Terms of Service and Privacy Policy.
+          </label>
+        </div>
+
+        <button
+          onClick={() => signInWithPassword(email, password)}
+          className="my-8 p-2 bg-gray-500 text-white rounded w-full"
+        >
+          Sign up
+        </button>
+        <button onClick={signInWithGoogle} className="mb-2 p-2">
+          <FcGoogle size={30} />
+        </button>
+      </div>
     </div>
   );
 };

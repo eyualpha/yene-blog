@@ -85,53 +85,58 @@ const BlogDetail = () => {
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-3xl font-bold mb-4">{blog.title}</h1>
-      <p className="text-gray-700 mb-4">{blog.detail}</p>
-      <p className="text-gray-500 text-sm">
-        Posted by {blog.author} on {new Date(blog.createdAt).toLocaleString()}
-      </p>
+    <div className="w-full bg-[#191919]  px-4 min-h-screen py-22">
+      <div className="max-w-[800px] mx-auto flex flex-col items-start justify-start p-4 bg-gray-900 rounded-lg shadow-lg text-white">
+        <h1 className="text-3xl font-bold mb-4">{blog.title}</h1>
+        <p className="text-gray-200 mb-4">{blog.detail}</p>
+        <p className="text-gray-400 text-sm">
+          Posted by {blog.author} on {new Date(blog.createdAt).toLocaleString()}
+        </p>
 
-      <div className="mt-8">
-        <h2 className="text-2xl font-semibold mb-4">Comments</h2>
-        {commentList.length > 0 ? (
-          commentList.map((comment) => (
-            <div key={comment.id} className="border-b py-2">
-              <div className="flex items-center mt-2">
-                <img
-                  src={comment.userPhoto}
-                  alt={comment.userName}
-                  className="w-8 h-8 rounded-full mr-2"
-                />
-                <p className="text-gray-700 font-semibold">
-                  {comment.userName}
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold mb-4">Comments</h2>
+          {commentList.length > 0 ? (
+            commentList.map((comment) => (
+              <div
+                key={comment.id}
+                className="mb-2 p-2 bg-gray-800 rounded-lg w-full"
+              >
+                <div className="flex items-center my-2 ">
+                  <img
+                    src={comment.userPhoto}
+                    alt={comment.userName}
+                    className="w-8 h-8 rounded-full mr-2"
+                  />
+                  <p className="text-gray-300 font-semibold">
+                    {comment.userName}
+                  </p>
+                </div>
+                <p>{comment.text}</p>
+
+                <p className="text-gray-400 text-sm">
+                  {new Date(comment.createdAt.toDate()).toLocaleString()}
                 </p>
               </div>
-              <p>{comment.text}</p>
+            ))
+          ) : (
+            <p>No comments yet. Be the first to comment!</p>
+          )}
+        </div>
 
-              <p className="text-gray-500 text-sm">
-                {new Date(comment.createdAt.toDate()).toLocaleString()}
-              </p>
-            </div>
-          ))
-        ) : (
-          <p>No comments yet. Be the first to comment!</p>
-        )}
-      </div>
-
-      <div className="mt-4">
-        <textarea
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Write a comment..."
-          className="w-full p-2 border rounded"
-        />
-        <button
-          onClick={handleAddComment}
-          className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          Add Comment
-        </button>
+        <div className="mt-4">
+          <textarea
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="Write a comment..."
+            className="w-full p-2 border rounded"
+          />
+          <button
+            onClick={handleAddComment}
+            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Add Comment
+          </button>
+        </div>
       </div>
     </div>
   );
