@@ -2,13 +2,12 @@ import React, { useState, useEffect } from "react";
 import logo from "../assets/logo.png";
 import { auth } from "../config/firebase";
 import { useNavigate } from "react-router-dom";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 
 const NavBar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
-  // Listen to authentication state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -18,7 +17,6 @@ const NavBar = () => {
       }
     });
 
-    // Cleanup the listener on component unmount
     return () => unsubscribe();
   }, []);
 
@@ -26,19 +24,13 @@ const NavBar = () => {
     navigate("/auth");
   };
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      console.log("User logged out successfully!");
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
-  };
-
   return (
     <div className="w-full bg-[#191919f0] fixed top-0 left-0 z-50">
       <div className="max-w-[1440px] mx-auto flex justify-between py-4 text-white items-center">
-        <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => navigate("/")}
+        >
           <img src={logo} alt="logo" className="w-10" />
           <h1 className="font-bold text-3xl">YeneBlog</h1>
         </div>
@@ -71,12 +63,6 @@ const NavBar = () => {
               >
                 {auth.currentUser.displayName}
               </span>
-              <button
-                className="bg-gray-300 text-black px-2 py-1 rounded hover:bg-gray-100 transition duration-300"
-                onClick={handleLogout}
-              >
-                Log Out
-              </button>
             </div>
           ) : (
             <button

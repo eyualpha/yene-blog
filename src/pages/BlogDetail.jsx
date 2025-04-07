@@ -81,7 +81,11 @@ const BlogDetail = () => {
   };
 
   if (!blog) {
-    return <p>Loading blog details...</p>;
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-[#191919] text-white">
+        <p>Loading blog details...</p>
+      </div>
+    );
   }
 
   return (
@@ -93,14 +97,11 @@ const BlogDetail = () => {
           Posted by {blog.author} on {new Date(blog.createdAt).toLocaleString()}
         </p>
 
-        <div className="mt-8">
+        <div className="mt-8 w-full bg-gray-800 p-4 rounded-lg shadow-md">
           <h2 className="text-2xl font-semibold mb-4">Comments</h2>
           {commentList.length > 0 ? (
             commentList.map((comment) => (
-              <div
-                key={comment.id}
-                className="mb-2 p-2 bg-gray-800 rounded-lg w-full"
-              >
+              <div key={comment.id} className="mb-2 p-2  rounded-lg w-full">
                 <div className="flex items-center my-2 ">
                   <img
                     src={comment.userPhoto}
@@ -119,7 +120,9 @@ const BlogDetail = () => {
               </div>
             ))
           ) : (
-            <p>No comments yet. Be the first to comment!</p>
+            <p className="text-center">
+              No comments yet. Be the first to comment!
+            </p>
           )}
         </div>
 

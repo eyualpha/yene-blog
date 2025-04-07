@@ -5,6 +5,7 @@ import { db } from "../config/firebase";
 import { collection, addDoc, onSnapshot } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import BlogCard from "../components/BlogCard";
+import { signOut } from "firebase/auth";
 
 const UserProfile = () => {
   const [title, setTitle] = useState("");
@@ -12,6 +13,7 @@ const UserProfile = () => {
   const navigate = useNavigate();
   const [blogList, setBlogList] = useState([]);
   const [userBlogList, setUserBlogList] = useState([]);
+  const [error, setError] = useState(null);
 
   const BlogCollectionRef = collection(db, "blogs");
 
@@ -34,7 +36,7 @@ const UserProfile = () => {
 
   const addBlog = async () => {
     if (!title || !detail) {
-      alert("Please fill in all fields.");
+      setError("Please fill in all fields.");
       return;
     }
     try {
@@ -57,16 +59,35 @@ const UserProfile = () => {
     setDetail("");
   };
 
+  const handleLogOut = async () => {
+    try {
+      navigate("/");
+      await signOut(auth);
+      console.log("Logged out successfully!");
+    } catch (error) {
+      console.error("Error logging out: ", error);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center w-full bg-[#191919] text-white p-4 min-h-screen py-22">
       <div className=" max-w-[1440px] mx-auto flex flex-col items-center justify-center px-4">
-        <p className="text-lg font-semibold my-2">
-          Welcome, <strong>{auth.currentUser.displayName}</strong>
-        </p>
+        <div className=" flex items-center justify-between w-full mb-4">
+          <p className="text-lg font-semibold my-2">
+            Welcome, <strong>{auth.currentUser.displayName}</strong>
+          </p>
+          <button
+            className="bg-gray-300 text-black hover:bg-gray-100 px-2 py-1 rounded cursor-pointer"
+            onClick={handleLogOut}
+          >
+            Log Out
+          </button>
+        </div>
 
         <h2 className="text-2xl font-bold my-4">Add New Blog</h2>
 
         <div className="flex flex-col w-lg mb-4">
+          <div className=" text-red-500 text-center p-2">{error}</div>
           <input
             type="text"
             value={title}

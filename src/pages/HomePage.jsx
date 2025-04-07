@@ -8,14 +8,13 @@ import {
   arrayUnion,
   arrayRemove,
 } from "firebase/firestore";
-import { Link, useNavigate } from "react-router-dom";
-import { logOut } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import BlogCard from "../components/BlogCard";
 
 const HomePage = () => {
   const navigate = useNavigate();
   const [blogList, setBlogList] = useState([]);
-
+  const [error, setError] = useState(null);
   const BlogCollectionRef = collection(db, "blogs");
 
   useEffect(() => {
@@ -31,7 +30,10 @@ const HomePage = () => {
 
   const handleLike = async (blogId) => {
     if (!auth.currentUser) {
-      alert("You must be logged in to like a blog!");
+      setError("You must be logged in to like a blog!");
+      setTimeout(() => {
+        setError(null);
+      }, 1000);
       navigate("/auth");
       return;
     }
@@ -66,9 +68,9 @@ const HomePage = () => {
   };
 
   return (
-    <div className=" w-full  bg-[#191919] text-white pt-15">
-      <div className="max-w-[1440px] mx-auto flex flex-col items-center justify-center px-4">
-        <div className="flex flex-col items-center justify-center text-center mt-10 h-[70vh] gap-8">
+    <div className=" w-full  bg-[#191919] text-white ">
+      <div className="max-w-[1440px] mx-auto flex flex-col items-center justify-center px-4 h-auto py-25">
+        <div className="flex flex-col items-center justify-center text-center mt-10  gap-8 py-10">
           <p className="text-gray-400 text-2xl mb-2 font-bold">
             Begin your journey toward deeper knowledge and meaningful insights
             here.
@@ -91,6 +93,9 @@ const HomePage = () => {
         </div>
         <p className=" text-5xl self-start">Explore Our Latest Blogs</p>
         <BlogCard blogList={blogList} handleLike={handleLike} />
+        <div className="text-white bg-red-500 p-2 absolute bottom-1 right-1">
+          {error}
+        </div>
       </div>
     </div>
   );

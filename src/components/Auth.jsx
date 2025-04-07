@@ -1,26 +1,16 @@
 import { auth, googleProvider } from "../config/firebase";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  createUserWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-} from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { FcGoogle } from "react-icons/fc";
 import { MdCheckBox } from "react-icons/md";
-
-// import {
-//   logOut,
-//   signInWithGoogle,
-//   signInWithPassword,
-//   error,
-// } from "../context/AuthContext";
 
 const Auth = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [termChecked, setTermChecked] = useState(false);
 
   const signInWithGoogle = async () => {
     try {
@@ -37,21 +27,15 @@ const Auth = () => {
       setError("Email and password are required.");
       return;
     }
+    if (!termChecked) {
+      setError("You must agree to the terms and conditions.");
+      return;
+    }
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       navigate("/");
     } catch (err) {
       setError("Failed to sign in with email and password.");
-      console.log(err);
-    }
-  };
-
-  const logOut = async () => {
-    try {
-      await signOut(auth);
-      navigate("/");
-    } catch (err) {
-      setError("Failed to log out.");
       console.log(err);
     }
   };
@@ -75,8 +59,13 @@ const Auth = () => {
           onChange={(e) => setPassword(e.target.value)}
           className="mb-4 p-2 border border-gray-300 rounded w-full"
         />
-        <div className="">
-          <input type="checkbox" className="mr-2" />
+        <div className="flex items-start gap-2 mb-4">
+          <input
+            type="checkbox"
+            checked={termChecked}
+            onChange={() => setTermChecked(!termChecked)}
+            className="cursor-pointer mt-1"
+          />
           <label className="text-gray-300">
             By creating an account, I confirm that I have read and agree to the
             Terms of Service and Privacy Policy.
