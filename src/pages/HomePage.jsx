@@ -70,9 +70,8 @@ const HomePage = () => {
     <div className=" w-full  bg-[#191919] text-white ">
       <div className="max-w-[1440px] mx-auto flex flex-col items-center justify-center px-4 h-auto py-25">
         <div className="flex flex-col items-center justify-center text-center mt-10  gap-8 py-10">
-          <p className="text-gray-400 text-2xl mb-2 font-bold">
-            Begin your journey toward deeper knowledge and meaningful insights
-            here.
+          <p className="bg-gray-400 text-xl text-black mb-2  px-4 py-2 rounded-full">
+            Begin your journey toward deeper knowledge
           </p>
           <h1 className="text-7xl font-bold mb-4">
             Discover Fresh Insights, Stories, and Ideas — Dive into Our Latest

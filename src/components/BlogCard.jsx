@@ -47,7 +47,7 @@ const BlogCard = ({ blogList, handleLike }) => {
         >
           <Link to={`/blog/${blog.id}`} key={blog.id}>
             <div className="h-[250px] w-full">
-              <div className="flex items-center my-2">
+              <div className="flex items-center mb-2">
                 <img
                   src={blog.authorPhoto}
                   alt={blog.author}

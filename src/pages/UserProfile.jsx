@@ -104,7 +104,7 @@ const UserProfile = () => {
           />
           <button
             onClick={addBlog}
-            className="bg-blue-500 text-white p-2 rounded"
+            className="bg-gray-300 text-black p-2 rounded"
           >
             Add
           </button>
