@@ -34,7 +34,6 @@ const HomePage = () => {
       setTimeout(() => {
         setError(null);
       }, 1000);
-      navigate("/auth");
       return;
     }
 
@@ -93,9 +92,11 @@ const HomePage = () => {
         </div>
         <p className=" text-5xl self-start">Explore Our Latest Blogs</p>
         <BlogCard blogList={blogList} handleLike={handleLike} />
-        <div className="text-white bg-red-500 p-2 absolute bottom-1 right-1">
-          {error}
-        </div>
+        {error && (
+          <div className="text-white bg-red-500 p-2 fixed bottom-1 right-1">
+            {error}
+          </div>
+        )}
       </div>
     </div>
   );

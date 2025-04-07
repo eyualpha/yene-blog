@@ -71,7 +71,7 @@ const BlogCard = ({ blogList, handleLike }) => {
               onClick={() => handleLikeClick(blog.id)}
               className="cursor-pointer flex items-center text-white"
             >
-              {likedBlogs[blog.id] ? (
+              {likedBlogs[blog.id] && auth.currentUser ? (
                 <FaHeart className="text-red-500" />
               ) : (
                 <FaRegHeart className="text-gray-400" />
