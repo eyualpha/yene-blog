@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -7,6 +7,7 @@ import {
 } from "firebase/auth";
 import { auth, googleProvider } from "../config/firebase";
 import { FcGoogle } from "react-icons/fc";
+import ThemeToggle from "./ThemeToggle";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -33,12 +34,10 @@ const Auth = () => {
 
   const handleEmailAuth = async () => {
     setError("");
-
     if (!email || !password) {
       setError("Email and password are required.");
       return;
     }
-
     if (isSignUp && !termChecked) {
       setError("You must agree to the terms and conditions.");
       return;
@@ -69,90 +68,100 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#191919] text-white p-4">
-      <div className="border border-gray-600 p-8 rounded-lg flex flex-col items-center bg-gray-900 shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-2">
+    <div className="min-h-screen bg-app flex flex-col items-center justify-center p-4 relative">
+      <div className="absolute top-6 right-6">
+        <ThemeToggle />
+      </div>
+
+      <Link to="/" className="flex items-center gap-2 mb-8">
+        <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-white font-bold text-lg">
+          Y
+        </div>
+        <span className="font-bold text-2xl text-app">
+          Yene<span className="text-accent">Blog</span>
+        </span>
+      </Link>
+
+      <div className="bg-card border border-app rounded-3xl shadow-app-lg p-8 md:p-10 w-full max-w-md">
+        <h1 className="text-2xl font-bold text-app mb-1 text-center">
           {isSignUp ? "Create Account" : "Welcome Back"}
         </h1>
-        <p className="text-gray-400 text-sm mb-6">
+        <p className="text-muted text-sm mb-8 text-center">
           {isSignUp
             ? "Join YeneBlog to publish and engage"
-            : "Sign in to publish blogs and comment"}
+            : "Sign in to publish articles and comment"}
         </p>
 
         {error && (
-          <p className="text-red-400 text-sm mb-4 w-full text-center">{error}</p>
+          <p className="text-red-500 text-sm mb-4 text-center bg-red-500/10 py-2 px-3 rounded-xl">
+            {error}
+          </p>
         )}
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mb-3 p-3 border border-gray-600 bg-gray-800 rounded w-full text-white placeholder-gray-500 focus:outline-none focus:border-gray-400"
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleEmailAuth()}
-          className="mb-4 p-3 border border-gray-600 bg-gray-800 rounded w-full text-white placeholder-gray-500 focus:outline-none focus:border-gray-400"
-        />
+        <div className="flex flex-col gap-3">
+          <input
+            type="email"
+            placeholder="Email address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-3.5 bg-input border border-app rounded-2xl text-app placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-[var(--accent)] transition"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleEmailAuth()}
+            className="w-full px-4 py-3.5 bg-input border border-app rounded-2xl text-app placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-[var(--accent)] transition"
+          />
 
-        {isSignUp && (
-          <div className="flex items-start gap-2 mb-4 w-full">
-            <input
-              type="checkbox"
-              id="terms"
-              checked={termChecked}
-              onChange={() => setTermChecked(!termChecked)}
-              className="cursor-pointer mt-1"
-            />
-            <label htmlFor="terms" className="text-gray-400 text-sm">
-              I agree to the Terms of Service and Privacy Policy.
+          {isSignUp && (
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={termChecked}
+                onChange={() => setTermChecked(!termChecked)}
+                className="mt-1 accent-[var(--accent)]"
+              />
+              <span className="text-muted text-sm">
+                I agree to the Terms of Service and Privacy Policy.
+              </span>
             </label>
-          </div>
-        )}
+          )}
 
-        <button
-          onClick={handleEmailAuth}
-          disabled={loading}
-          className="mb-4 p-3 bg-white text-black rounded w-full font-medium hover:bg-gray-200 transition disabled:opacity-50"
-        >
-          {loading
-            ? "Please wait..."
-            : isSignUp
-              ? "Sign Up"
-              : "Sign In"}
-        </button>
+          <button
+            onClick={handleEmailAuth}
+            disabled={loading}
+            className="w-full py-3.5 bg-accent hover-accent text-white font-semibold rounded-2xl transition disabled:opacity-50 mt-2 hover:scale-[1.01]"
+          >
+            {loading ? "Please wait..." : isSignUp ? "Sign Up" : "Sign In"}
+          </button>
+        </div>
 
-        <div className="relative w-full text-center my-4">
-          <span className="text-gray-500 text-sm bg-gray-900 px-2 relative z-10">
-            or
-          </span>
+        <div className="relative my-6 text-center">
+          <span className="text-muted text-xs bg-card px-3 relative z-10">or continue with</span>
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-700" />
+            <div className="w-full border-t border-app" />
           </div>
         </div>
 
         <button
           onClick={signInWithGoogle}
           disabled={loading}
-          className="flex items-center justify-center gap-2 w-full p-3 border border-gray-600 rounded hover:bg-gray-800 transition disabled:opacity-50"
+          className="flex items-center justify-center gap-3 w-full py-3.5 border border-app rounded-2xl text-app hover:bg-elevated transition disabled:opacity-50 font-medium"
         >
-          <FcGoogle size={24} />
-          Continue with Google
+          <FcGoogle size={22} />
+          Google
         </button>
 
-        <p className="mt-6 text-gray-400 text-sm">
+        <p className="mt-8 text-muted text-sm text-center">
           {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
           <button
             onClick={() => {
               setIsSignUp(!isSignUp);
               setError("");
             }}
-            className="text-white underline hover:no-underline"
+            className="text-accent font-semibold hover:underline"
           >
             {isSignUp ? "Sign In" : "Sign Up"}
           </button>

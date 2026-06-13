@@ -6,6 +6,8 @@ import { BLOG_CATEGORIES } from "../constants/blogCategories";
 import BlogCard from "../components/BlogCard";
 import LoadingSpinner from "../components/LoadingSpinner";
 import Toast from "../components/Toast";
+import Footer from "../components/Footer";
+import ThemeToggle from "../components/ThemeToggle";
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -20,7 +22,7 @@ const UserProfile = () => {
 
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
-  const [category, setCategory] = useState("Other");
+  const [category, setCategory] = useState("Technology");
   const [editingId, setEditingId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState({ message: "", type: "error" });
@@ -28,7 +30,7 @@ const UserProfile = () => {
   const resetForm = () => {
     setTitle("");
     setDetail("");
-    setCategory("Other");
+    setCategory("Technology");
     setEditingId(null);
   };
 
@@ -46,19 +48,19 @@ const UserProfile = () => {
           detail: detail.trim(),
           category,
         });
-        setToast({ message: "Blog updated successfully!", type: "success" });
+        setToast({ message: "Article updated!", type: "success" });
       } else {
         await handleCreateBlog({
           title: title.trim(),
           detail: detail.trim(),
           category,
         });
-        setToast({ message: "Blog published successfully!", type: "success" });
+        setToast({ message: "Article published!", type: "success" });
       }
       resetForm();
     } catch (err) {
       console.error("Error saving blog:", err);
-      setToast({ message: "Failed to save blog.", type: "error" });
+      setToast({ message: "Failed to save article.", type: "error" });
     } finally {
       setSubmitting(false);
     }
@@ -68,71 +70,73 @@ const UserProfile = () => {
     setEditingId(blog.id);
     setTitle(blog.title);
     setDetail(blog.detail);
-    setCategory(blog.category || "Other");
+    setCategory(blog.category || "Technology");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleDelete = async (blogId) => {
-    if (!window.confirm("Are you sure you want to delete this blog?")) return;
+    if (!window.confirm("Delete this article?")) return;
     try {
       await handleDeleteBlog(blogId);
       if (editingId === blogId) resetForm();
-      setToast({ message: "Blog deleted.", type: "success" });
+      setToast({ message: "Article deleted.", type: "success" });
     } catch (err) {
       console.error("Error deleting blog:", err);
-      setToast({ message: "Failed to delete blog.", type: "error" });
+      setToast({ message: "Failed to delete.", type: "error" });
     }
   };
 
   const handleLogOut = async () => {
-    try {
-      await logout();
-      navigate("/");
-    } catch (err) {
-      console.error("Error logging out:", err);
-    }
+    await logout();
+    navigate("/");
   };
 
   return (
-    <div className="flex flex-col items-center w-full bg-[#191919] text-white p-4 min-h-screen py-22">
-      <div className="max-w-[1440px] mx-auto flex flex-col items-center w-full px-4">
-        <div className="flex items-center justify-between w-full mb-6">
-          <div className="flex items-center gap-3">
+    <div className="w-full bg-app min-h-screen pt-24 pb-8">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
             <img
-              src={user?.photoURL || "https://via.placeholder.com/48"}
+              src={user?.photoURL || "https://api.dicebear.com/7.x/avataaars/svg?seed=user"}
               alt={user?.displayName}
-              className="w-12 h-12 rounded-full object-cover"
+              className="w-14 h-14 rounded-full object-cover border-2 border-accent"
             />
             <div>
-              <p className="text-lg font-semibold">{user?.displayName}</p>
-              <p className="text-gray-400 text-sm">{user?.email}</p>
+              <p className="text-xl font-bold text-app">{user?.displayName}</p>
+              <p className="text-muted text-sm">{user?.email}</p>
             </div>
           </div>
-          <button
-            className="bg-gray-300 text-black hover:bg-gray-100 px-4 py-2 rounded cursor-pointer"
-            onClick={handleLogOut}
-          >
-            Log Out
-          </button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={handleLogOut}
+              className="px-4 py-2 border border-app rounded-xl text-secondary hover:text-app hover:bg-elevated transition text-sm font-medium"
+            >
+              Log Out
+            </button>
+          </div>
         </div>
 
-        <div className="w-full max-w-2xl bg-gray-900 p-6 rounded-lg mb-8">
-          <h2 className="text-2xl font-bold mb-4">
-            {editingId ? "Edit Blog" : "Publish New Blog"}
+        <div className="bg-card rounded-3xl border border-app shadow-app p-6 md:p-8 mb-10">
+          <h2 className="text-2xl font-bold text-app mb-1">
+            {editingId ? "Edit Article" : "Write New Article"}
           </h2>
+          <p className="text-muted text-sm mb-6">
+            Share your ideas with the YeneBlog community.
+          </p>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4 max-w-2xl">
             <input
               type="text"
               value={title}
-              placeholder="Blog title"
+              placeholder="Article title"
               onChange={(e) => setTitle(e.target.value)}
-              className="border border-gray-600 bg-gray-800 rounded p-3 text-white placeholder-gray-500 focus:outline-none focus:border-gray-400"
+              className="w-full px-4 py-3.5 bg-input border border-app rounded-2xl text-app placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-[var(--accent)] transition"
             />
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="border border-gray-600 bg-gray-800 rounded p-3 text-white focus:outline-none focus:border-gray-400"
+              className="w-full px-4 py-3.5 bg-input border border-app rounded-2xl text-app focus:outline-none focus:ring-2 focus:ring-[var(--accent)] transition"
             >
               {BLOG_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
@@ -142,27 +146,23 @@ const UserProfile = () => {
             </select>
             <textarea
               value={detail}
-              placeholder="Write your blog content..."
+              placeholder="Write your article content..."
               onChange={(e) => setDetail(e.target.value)}
-              rows={8}
-              className="border border-gray-600 bg-gray-800 rounded p-3 text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 resize-y"
+              rows={10}
+              className="w-full px-4 py-3.5 bg-input border border-app rounded-2xl text-app placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-[var(--accent)] resize-y transition"
             />
             <div className="flex gap-3">
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="bg-white text-black px-6 py-2 rounded hover:bg-gray-200 transition disabled:opacity-50"
+                className="px-8 py-3 bg-accent hover-accent text-white font-semibold rounded-2xl transition disabled:opacity-50 hover:scale-[1.02]"
               >
-                {submitting
-                  ? "Saving..."
-                  : editingId
-                    ? "Update Blog"
-                    : "Publish Blog"}
+                {submitting ? "Saving..." : editingId ? "Update Article" : "Publish Article"}
               </button>
               {editingId && (
                 <button
                   onClick={resetForm}
-                  className="border border-gray-600 px-6 py-2 rounded hover:bg-gray-800 transition"
+                  className="px-6 py-3 border border-app rounded-2xl text-secondary hover:text-app hover:bg-elevated transition"
                 >
                   Cancel
                 </button>
@@ -171,12 +171,13 @@ const UserProfile = () => {
           </div>
         </div>
 
-        <h2 className="text-2xl font-bold mb-4 self-start">
-          Your Blogs ({userBlogs.length})
+        <h2 className="text-2xl font-bold text-app mb-6">
+          Your Articles
+          <span className="text-muted font-normal text-lg ml-2">({userBlogs.length})</span>
         </h2>
 
         {loading ? (
-          <LoadingSpinner message="Loading your blogs..." />
+          <LoadingSpinner message="Loading your articles..." />
         ) : (
           <BlogCard
             blogList={userBlogs}
@@ -185,6 +186,10 @@ const UserProfile = () => {
             onDelete={handleDelete}
           />
         )}
+      </div>
+
+      <div className="mt-12">
+        <Footer />
       </div>
 
       <Toast

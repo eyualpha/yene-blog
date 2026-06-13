@@ -7,7 +7,7 @@ const PrivateRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#191919] flex items-center justify-center">
+      <div className="min-h-screen bg-app flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );

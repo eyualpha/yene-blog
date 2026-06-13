@@ -9,16 +9,15 @@ const Toast = ({ message, type = "error", onClose }) => {
 
   if (!message) return null;
 
-  const bgColor =
-    type === "success"
-      ? "bg-green-600"
-      : type === "info"
-        ? "bg-blue-600"
-        : "bg-red-500";
+  const styles = {
+    success: "bg-emerald-600",
+    info: "bg-accent",
+    error: "bg-red-500",
+  };
 
   return (
     <div
-      className={`fixed bottom-4 right-4 z-50 ${bgColor} text-white px-4 py-3 rounded-lg shadow-lg max-w-sm`}
+      className={`fixed bottom-6 right-6 z-[100] ${styles[type] || styles.error} text-white px-5 py-3.5 rounded-2xl shadow-app-lg max-w-sm text-sm font-medium animate-in fade-in slide-in-from-bottom-2`}
     >
       {message}
     </div>

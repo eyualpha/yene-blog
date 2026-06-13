@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { FaHeart, FaRegHeart, FaArrowLeft } from "react-icons/fa";
+import { FiArrowLeft, FiCalendar, FiEye, FiHeart } from "react-icons/fi";
+import { FaHeart } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 import { useBlogs } from "../context/BlogContext";
 import { getBlogById } from "../services/blogService";
 import { subscribeToComments, addComment } from "../services/commentService";
 import { formatDate } from "../utils/formatDate";
 import { getReadingTime } from "../utils/readingTime";
+import { getCategoryStyle } from "../utils/categoryImages";
 import LoadingSpinner from "../components/LoadingSpinner";
 import Toast from "../components/Toast";
+import Footer from "../components/Footer";
 
 const BlogDetail = () => {
   const navigate = useNavigate();
@@ -56,19 +59,17 @@ const BlogDetail = () => {
       setToast({ message: "Please log in to like posts.", type: "info" });
       return;
     }
-    setIsLiked((prev) => !prev);
+    const wasLiked = isLiked;
+    setIsLiked(!wasLiked);
     try {
       await handleLike(blogId);
       setBlog((prev) =>
         prev
-          ? {
-              ...prev,
-              likes: isLiked ? (prev.likes || 1) - 1 : (prev.likes || 0) + 1,
-            }
+          ? { ...prev, likes: wasLiked ? (prev.likes || 1) - 1 : (prev.likes || 0) + 1 }
           : prev
       );
     } catch {
-      setIsLiked((prev) => !prev);
+      setIsLiked(wasLiked);
       setToast({ message: "Failed to update like.", type: "error" });
     }
   };
@@ -104,101 +105,120 @@ const BlogDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-[#191919] text-white">
-        <LoadingSpinner message="Loading blog..." />
+      <div className="min-h-screen w-full flex items-center justify-center bg-app">
+        <LoadingSpinner message="Loading article..." />
       </div>
     );
   }
 
   if (!blog) {
     return (
-      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#191919] text-white gap-4">
-        <p className="text-xl">Blog not found.</p>
-        <Link to="/" className="text-blue-400 hover:underline flex items-center gap-2">
-          <FaArrowLeft /> Back to home
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-app gap-4 pt-20">
+        <p className="text-xl text-app">Article not found.</p>
+        <Link to="/" className="text-accent hover:underline flex items-center gap-2">
+          <FiArrowLeft /> Back to home
         </Link>
       </div>
     );
   }
 
+  const style = getCategoryStyle(blog.category);
+
   return (
-    <div className="w-full bg-[#191919] px-4 min-h-screen py-22">
-      <div className="max-w-[800px] mx-auto">
+    <div className="w-full bg-app min-h-screen pt-24 pb-8">
+      <div className="max-w-3xl mx-auto px-4">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition"
+          className="inline-flex items-center gap-2 text-secondary hover:text-app mb-8 transition text-sm font-medium"
         >
-          <FaArrowLeft /> Back to blogs
+          <FiArrowLeft size={16} /> Back to articles
         </Link>
 
-        <article className="flex flex-col p-6 bg-gray-900 rounded-lg shadow-lg text-white">
+        <div
+          className={`relative h-56 md:h-72 rounded-3xl bg-gradient-to-br ${style.gradient} flex items-center justify-center mb-8 overflow-hidden shadow-app-lg`}
+        >
+          <span className="text-8xl opacity-30 select-none">{style.emoji}</span>
           {blog.category && (
-            <span className="inline-block self-start text-sm bg-gray-700 text-gray-300 px-3 py-1 rounded-full mb-4">
+            <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/30 backdrop-blur-sm text-white text-xs font-medium">
               {blog.category}
             </span>
           )}
+        </div>
 
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">{blog.title}</h1>
+        <article className="bg-card rounded-3xl border border-app shadow-app p-6 md:p-10">
+          <h1 className="text-3xl md:text-4xl font-bold text-app mb-6 leading-tight">
+            {blog.title}
+          </h1>
 
-          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-700">
-            <img
-              src={blog.authorPhoto || "https://via.placeholder.com/40"}
-              alt={blog.author}
-              className="w-10 h-10 rounded-full object-cover"
-            />
-            <div>
-              <p className="text-gray-200 font-semibold">{blog.author}</p>
-              <p className="text-gray-500 text-sm">
-                {formatDate(blog.createdAt)} · {getReadingTime(blog.detail)}
-              </p>
+          <div className="flex flex-wrap items-center gap-4 mb-8 pb-6 border-b border-app">
+            <div className="flex items-center gap-3">
+              <img
+                src={blog.authorPhoto || "https://api.dicebear.com/7.x/avataaars/svg?seed=author"}
+                alt={blog.author}
+                className="w-11 h-11 rounded-full object-cover border-2 border-app"
+              />
+              <div>
+                <p className="text-app font-semibold">{blog.author}</p>
+                <div className="flex items-center gap-3 text-muted text-xs mt-0.5">
+                  <span className="flex items-center gap-1">
+                    <FiCalendar size={12} />
+                    {formatDate(blog.createdAt)}
+                  </span>
+                  <span>{getReadingTime(blog.detail)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 ml-auto">
+              <span className="flex items-center gap-1.5 text-muted text-sm">
+                <FiEye size={14} />
+                {blog.likes || 0}
+              </span>
+              <button
+                onClick={onLike}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  isLiked && user
+                    ? "bg-red-500/15 text-red-500 border border-red-500/30"
+                    : "bg-elevated border border-app text-secondary hover:text-red-500 hover:border-red-500/30"
+                }`}
+              >
+                {isLiked && user ? <FaHeart size={14} /> : <FiHeart size={14} />}
+                {blog.likes || 0}
+              </button>
             </div>
           </div>
 
-          <p className="text-gray-200 text-lg leading-relaxed whitespace-pre-wrap mb-6">
+          <div className="text-secondary text-base md:text-lg leading-relaxed whitespace-pre-wrap mb-10">
             {blog.detail}
-          </p>
-
-          <div className="flex items-center gap-4 mb-8">
-            <button
-              onClick={onLike}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition"
-            >
-              {isLiked && user ? (
-                <FaHeart className="text-red-500" />
-              ) : (
-                <FaRegHeart className="text-gray-400" />
-              )}
-              <span>{blog.likes || 0} likes</span>
-            </button>
           </div>
 
-          <section className="w-full bg-gray-800 p-4 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4">
+          <section className="bg-elevated rounded-2xl p-5 md:p-6 border border-app">
+            <h2 className="text-xl font-bold text-app mb-5">
               Comments ({commentList.length})
             </h2>
 
             {commentList.length > 0 ? (
               <div className="space-y-4 mb-6">
                 {commentList.map((comment) => (
-                  <div key={comment.id} className="p-3 bg-gray-900 rounded-lg">
-                    <div className="flex items-center mb-2">
-                      <img
-                        src={comment.userPhoto || "https://via.placeholder.com/32"}
-                        alt={comment.userName}
-                        className="w-8 h-8 rounded-full mr-2 object-cover"
-                      />
-                      <p className="text-gray-300 font-semibold">{comment.userName}</p>
+                  <div key={comment.id} className="flex gap-3 p-4 bg-card rounded-xl border border-app">
+                    <img
+                      src={comment.userPhoto || "https://api.dicebear.com/7.x/avataaars/svg?seed=comment"}
+                      alt={comment.userName}
+                      className="w-9 h-9 rounded-full object-cover flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="text-app font-semibold text-sm">{comment.userName}</p>
+                        <span className="text-muted text-xs">{formatDate(comment.createdAt)}</span>
+                      </div>
+                      <p className="text-secondary text-sm leading-relaxed">{comment.text}</p>
                     </div>
-                    <p className="text-gray-200 ml-10">{comment.text}</p>
-                    <p className="text-gray-500 text-xs ml-10 mt-1">
-                      {formatDate(comment.createdAt)}
-                    </p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-400 text-center py-4 mb-4">
-                No comments yet. Be the first to comment!
+              <p className="text-muted text-center py-6 mb-4 text-sm">
+                No comments yet. Be the first to share your thoughts!
               </p>
             )}
 
@@ -206,21 +226,25 @@ const BlogDetail = () => {
               <textarea
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                placeholder={user ? "Write a comment..." : "Log in to comment..."}
+                placeholder={user ? "Write a comment..." : "Sign in to comment..."}
                 disabled={!user || submitting}
                 rows={3}
-                className="w-full p-3 bg-gray-900 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 disabled:opacity-50"
+                className="w-full p-4 bg-input border border-app rounded-2xl text-app placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-[var(--accent)] disabled:opacity-50 resize-none text-sm"
               />
               <button
                 onClick={handleAddComment}
                 disabled={!user || submitting || !newComment.trim()}
-                className="mt-2 px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-3 px-6 py-2.5 bg-accent hover-accent text-white font-semibold rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed text-sm"
               >
                 {submitting ? "Posting..." : "Add Comment"}
               </button>
             </div>
           </section>
         </article>
+      </div>
+
+      <div className="mt-12">
+        <Footer />
       </div>
 
       <Toast

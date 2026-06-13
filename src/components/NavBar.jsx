@@ -1,67 +1,99 @@
-import { Link, useNavigate } from "react-router-dom";
-import logo from "../assets/logo.png";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { FiBell, FiPhone } from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
+import ThemeToggle from "./ThemeToggle";
+
+const NAV_LINKS = [
+  { label: "Home", path: "/" },
+  { label: "Blog", path: "/#articles" },
+  { label: "Write", path: "/profile", auth: true },
+  { label: "About", path: "/#newsletter" },
+];
 
 const NavBar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleLogout = async () => {
-    await logout();
-    navigate("/");
+  const handleNavClick = (link) => {
+    if (link.auth && !user) {
+      navigate("/auth");
+      return;
+    }
+    if (link.path.startsWith("/#")) {
+      if (location.pathname !== "/") {
+        navigate("/");
+        setTimeout(() => {
+          document.getElementById(link.path.slice(2))?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      } else {
+        document.getElementById(link.path.slice(2))?.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      navigate(link.path);
+    }
   };
 
   return (
-    <header className="w-full bg-[#191919f0] backdrop-blur-sm fixed top-0 left-0 z-50 border-b border-gray-800">
-      <div className="max-w-[1440px] mx-auto flex justify-between py-4 px-4 text-white items-center">
-        <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="YeneBlog logo" className="w-10" />
-          <h1 className="font-bold text-2xl md:text-3xl">YeneBlog</h1>
+    <header className="w-full bg-nav backdrop-blur-md fixed top-0 left-0 z-50 border-b border-app">
+      <div className="max-w-6xl mx-auto flex justify-between items-center py-4 px-4 md:px-6">
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center text-white font-bold text-lg shadow-app group-hover:scale-105 transition-transform">
+            Y
+          </div>
+          <span className="font-bold text-xl tracking-tight text-app">
+            Yene<span className="text-accent">Blog</span>
+          </span>
         </Link>
 
-        <nav>
-          <ul className="flex gap-4 md:gap-6">
-            <li>
-              <Link to="/" className="hover:text-gray-400 transition">
-                Home
-              </Link>
-            </li>
-            {user && (
-              <li>
-                <Link to="/profile" className="hover:text-gray-400 transition">
-                  Profile
-                </Link>
-              </li>
-            )}
-          </ul>
+        <nav className="hidden md:flex items-center gap-8">
+          {NAV_LINKS.map((link) => (
+            <button
+              key={link.label}
+              onClick={() => handleNavClick(link)}
+              className="text-secondary hover:text-app text-sm font-medium transition-colors"
+            >
+              {link.label}
+            </button>
+          ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
+          <ThemeToggle />
+
           {user ? (
             <>
-              <Link to="/profile" className="flex items-center gap-2 hover:opacity-80 transition">
+              <button
+                className="hidden sm:flex w-10 h-10 rounded-full bg-elevated border border-app items-center justify-center text-secondary hover:text-app transition"
+                aria-label="Notifications"
+              >
+                <FiBell size={18} />
+              </button>
+              <Link
+                to="/profile"
+                className="w-9 h-9 rounded-full overflow-hidden border-2 border-accent ring-2 ring-transparent hover:ring-[var(--accent-soft)] transition"
+              >
                 <img
-                  src={user.photoURL || "https://via.placeholder.com/32"}
+                  src={user.photoURL || "https://api.dicebear.com/7.x/avataaars/svg?seed=user"}
                   alt={user.displayName}
-                  className="w-8 h-8 rounded-full object-cover"
+                  className="w-full h-full object-cover"
                 />
-                <span className="hidden sm:inline text-sm">
-                  {user.displayName}
-                </span>
               </Link>
               <button
-                onClick={handleLogout}
-                className="text-sm text-gray-400 hover:text-white transition hidden md:block"
+                onClick={() => logout()}
+                className="hidden lg:flex items-center gap-2 bg-surface border border-app text-app text-sm font-medium px-4 py-2 rounded-full hover:bg-elevated transition"
               >
-                Log Out
+                <FiPhone size={14} />
+                Profile
               </button>
             </>
           ) : (
             <Link
               to="/auth"
-              className="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-100 transition text-sm font-medium"
+              className="flex items-center gap-2 bg-surface border border-app text-app text-sm font-medium px-4 py-2.5 rounded-full hover:bg-elevated transition shadow-app"
             >
-              Log In
+              <FiPhone size={14} />
+              <span className="hidden sm:inline">Sign In</span>
             </Link>
           )}
         </div>
