@@ -1,80 +1,72 @@
-import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
-import { auth } from "../config/firebase";
-import { useNavigate } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
+import { useAuth } from "../context/AuthContext";
 
 const NavBar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setIsLoggedIn(true);
-      } else {
-        setIsLoggedIn(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const handleLogin = () => {
-    navigate("/auth");
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
   };
 
   return (
-    <div className="w-full bg-[#191919f0] fixed top-0 left-0 z-50">
-      <div className="max-w-[1440px] mx-auto flex justify-between py-4 text-white items-center">
-        <div
-          className="flex items-center gap-2 cursor-pointer"
-          onClick={() => navigate("/")}
-        >
-          <img src={logo} alt="logo" className="w-10" />
-          <h1 className="font-bold text-3xl">YeneBlog</h1>
-        </div>
+    <header className="w-full bg-[#191919f0] backdrop-blur-sm fixed top-0 left-0 z-50 border-b border-gray-800">
+      <div className="max-w-[1440px] mx-auto flex justify-between py-4 px-4 text-white items-center">
+        <Link to="/" className="flex items-center gap-2">
+          <img src={logo} alt="YeneBlog logo" className="w-10" />
+          <h1 className="font-bold text-2xl md:text-3xl">YeneBlog</h1>
+        </Link>
+
         <nav>
-          <ul className="flex gap-4">
+          <ul className="flex gap-4 md:gap-6">
             <li>
-              <a href="/" className="hover:text-gray-400">
+              <Link to="/" className="hover:text-gray-400 transition">
                 Home
-              </a>
+              </Link>
             </li>
-            <li>
-              <a href="/profile" className="hover:text-gray-400">
-                Profile
-              </a>
-            </li>
+            {user && (
+              <li>
+                <Link to="/profile" className="hover:text-gray-400 transition">
+                  Profile
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
-        <div className="flex items-center">
-          {isLoggedIn ? (
-            <div className="flex items-center gap-2">
-              <img
-                src={auth.currentUser.photoURL}
-                alt={auth.currentUser.displayName}
-                className="w-8 h-8 rounded-full cursor-pointer"
-                onClick={() => navigate("/profile")}
-              />
-              <span
-                className="mr-2  cursor-pointer"
-                onClick={() => navigate("/profile")}
+
+        <div className="flex items-center gap-3">
+          {user ? (
+            <>
+              <Link to="/profile" className="flex items-center gap-2 hover:opacity-80 transition">
+                <img
+                  src={user.photoURL || "https://via.placeholder.com/32"}
+                  alt={user.displayName}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+                <span className="hidden sm:inline text-sm">
+                  {user.displayName}
+                </span>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="text-sm text-gray-400 hover:text-white transition hidden md:block"
               >
-                {auth.currentUser.displayName}
-              </span>
-            </div>
+                Log Out
+              </button>
+            </>
           ) : (
-            <button
-              className="bg-gray-300 text-black px-2 py-1 rounded hover:bg-gray-100 transition duration-300"
-              onClick={handleLogin}
+            <Link
+              to="/auth"
+              className="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-100 transition text-sm font-medium"
             >
               Log In
-            </button>
+            </Link>
           )}
         </div>
       </div>
-    </div>
+    </header>
   );
 };
 

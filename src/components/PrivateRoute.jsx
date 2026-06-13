@@ -1,25 +1,19 @@
 import { Navigate } from "react-router-dom";
-import { auth } from "../config/firebase";
-import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import LoadingSpinner from "./LoadingSpinner";
 
 const PrivateRoute = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const { user, loading } = useAuth();
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="min-h-screen bg-[#191919] flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
-  return user ? children : <Navigate to="/auth" />;
+  return user ? children : <Navigate to="/auth" replace />;
 };
 
 export default PrivateRoute;
