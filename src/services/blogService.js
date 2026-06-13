@@ -53,13 +53,19 @@ export const getBlogById = async (blogId) => {
 };
 
 export const createBlog = async (blogData) => {
-  return addDoc(blogsRef, {
+  const docRef = await addDoc(blogsRef, {
     ...blogData,
+    coverImage: blogData.coverImage || "",
+    coverImagePublicId: blogData.coverImagePublicId || "",
+    tags: blogData.tags || [],
+    status: blogData.status || "published",
+    views: 0,
     likes: 0,
     likedBy: [],
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
+  return docRef.id;
 };
 
 export const updateBlog = async (blogId, updates) => {
@@ -86,4 +92,13 @@ export const toggleBlogLike = async (blogId, userId, isLiked) => {
       likedBy: arrayUnion(userId),
     });
   }
+};
+
+export const incrementBlogViews = async (blogId) => {
+  const sessionKey = `viewed-${blogId}`;
+  if (sessionStorage.getItem(sessionKey)) return false;
+
+  sessionStorage.setItem(sessionKey, "1");
+  await updateDoc(doc(db, "blogs", blogId), { views: increment(1) });
+  return true;
 };

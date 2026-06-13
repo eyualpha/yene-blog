@@ -1,10 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { FiSearch } from "react-icons/fi";
-import { FaTwitter, FaYoutube } from "react-icons/fa";
-import { FILTER_CATEGORIES } from "../constants/blogCategories";
 import { getCategoryStyle } from "../utils/categoryImages";
-import { formatDate } from "../utils/formatDate";
+import BlogCover from "./BlogCover";
 
 const FeaturedCarousel = ({ blogs }) => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -74,13 +71,26 @@ const FeaturedCarousel = ({ blogs }) => {
           </Link>
         </div>
 
-        <div className="hidden md:flex flex-1 items-center justify-center relative overflow-hidden">
-          <div
-            className={`absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-30`}
-          />
-          <span className="text-8xl md:text-9xl opacity-60 select-none z-10">
-            {style.emoji}
-          </span>
+        <div className="hidden md:flex flex-1 items-stretch relative overflow-hidden">
+          {blog.coverImage ? (
+            <>
+              <img
+                src={blog.coverImage}
+                alt={blog.title}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-l from-transparent to-black/30" />
+            </>
+          ) : (
+            <>
+              <div
+                className={`absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-30`}
+              />
+              <span className="text-8xl md:text-9xl opacity-60 select-none z-10 m-auto">
+                {style.emoji}
+              </span>
+            </>
+          )}
         </div>
       </div>
 
@@ -103,78 +113,5 @@ const FeaturedCarousel = ({ blogs }) => {
     </section>
   );
 };
-
-export const HeroSection = ({
-  searchQuery,
-  onSearchChange,
-  categoryFilter,
-  onCategoryChange,
-}) => (
-  <section className="w-full max-w-6xl mx-auto px-4 pt-28 pb-8">
-    <div className="flex justify-between items-start mb-8">
-      <div className="max-w-2xl">
-        <h1 className="text-3xl md:text-5xl font-bold text-app leading-tight mb-3">
-          Discover Nice Articles Here
-        </h1>
-        <p className="text-secondary text-sm md:text-base max-w-lg">
-          Explore articles crafted by passionate writers. From deep tech dives to
-          everyday insights — there is something for every curious mind.
-        </p>
-      </div>
-
-      <div className="hidden sm:flex gap-2 mt-2">
-        <a
-          href="https://twitter.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-9 h-9 rounded-full bg-elevated border border-app flex items-center justify-center text-secondary hover:text-accent hover:border-accent transition"
-          aria-label="Twitter"
-        >
-          <FaTwitter size={16} />
-        </a>
-        <a
-          href="https://youtube.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-9 h-9 rounded-full bg-elevated border border-app flex items-center justify-center text-secondary hover:text-red-500 hover:border-red-500 transition"
-          aria-label="YouTube"
-        >
-          <FaYoutube size={16} />
-        </a>
-      </div>
-    </div>
-
-    <div className="relative mb-6">
-      <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-muted" size={20} />
-      <input
-        type="search"
-        value={searchQuery}
-        onChange={(e) => onSearchChange(e.target.value)}
-        placeholder="Search..."
-        className="w-full pl-14 pr-5 py-4 bg-input border border-app rounded-2xl text-app placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent transition shadow-app"
-      />
-    </div>
-
-    <div className="flex flex-wrap gap-2 md:gap-3">
-      {FILTER_CATEGORIES.map((cat) => {
-        const isActive =
-          cat === "All" ? !categoryFilter : categoryFilter === cat;
-        return (
-          <button
-            key={cat}
-            onClick={() => onCategoryChange(cat === "All" ? "" : cat)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-              isActive
-                ? "bg-accent text-white shadow-app hover-accent"
-                : "text-secondary hover:text-app hover:bg-elevated"
-            }`}
-          >
-            {cat}
-          </button>
-        );
-      })}
-    </div>
-  </section>
-);
 
 export default FeaturedCarousel;

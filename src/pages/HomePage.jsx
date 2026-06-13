@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useBlogs } from "../context/BlogContext";
 import { useAuth } from "../context/AuthContext";
 import BlogCard from "../components/BlogCard";
-import FeaturedCarousel, { HeroSection } from "../components/FeaturedCarousel";
+import FeaturedCarousel from "../components/FeaturedCarousel";
+import HeroSection from "../components/HeroSection";
 import Footer, { Pagination } from "../components/Footer";
 import Newsletter from "../components/Newsletter";
-import LoadingSpinner from "../components/LoadingSpinner";
+import TrendingTags from "../components/TrendingTags";
 import { ARTICLES_PER_PAGE } from "../constants/blogCategories";
 
 const HomePage = () => {
@@ -20,6 +21,8 @@ const HomePage = () => {
     setSearchQuery,
     categoryFilter,
     setCategoryFilter,
+    tagFilter,
+    setTagFilter,
   } = useBlogs();
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -32,13 +35,15 @@ const HomePage = () => {
 
   const featuredBlogs = useMemo(
     () =>
-      [...allBlogs].sort((a, b) => (b.likes || 0) - (a.likes || 0)).slice(0, 5),
+      [...allBlogs]
+        .sort((a, b) => (b.views || 0) - (a.views || 0) || (b.likes || 0) - (a.likes || 0))
+        .slice(0, 5),
     [allBlogs]
   );
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, categoryFilter]);
+  }, [searchQuery, categoryFilter, tagFilter]);
 
   useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(totalPages);
@@ -58,6 +63,12 @@ const HomePage = () => {
       )}
 
       <section id="articles" className="w-full max-w-6xl mx-auto px-4 pb-8">
+        <TrendingTags
+          blogs={allBlogs}
+          activeTag={tagFilter}
+          onTagSelect={setTagFilter}
+        />
+
         <h2 className="text-2xl md:text-3xl font-bold text-app text-center mb-10">
           Articles
         </h2>

@@ -1,17 +1,19 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { FiBell, FiPhone } from "react-icons/fi";
+import { FiBookmark } from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
+import { useBookmarks } from "../context/BookmarkContext";
 import ThemeToggle from "./ThemeToggle";
 
 const NAV_LINKS = [
   { label: "Home", path: "/" },
   { label: "Blog", path: "/#articles" },
+  { label: "Saved", path: "/saved", auth: true },
   { label: "Write", path: "/profile", auth: true },
-  { label: "About", path: "/#newsletter" },
 ];
 
 const NavBar = () => {
   const { user, logout } = useAuth();
+  const { bookmarks } = useBookmarks();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -63,12 +65,18 @@ const NavBar = () => {
 
           {user ? (
             <>
-              <button
-                className="hidden sm:flex w-10 h-10 rounded-full bg-elevated border border-app items-center justify-center text-secondary hover:text-app transition"
-                aria-label="Notifications"
+              <Link
+                to="/saved"
+                className="relative w-10 h-10 rounded-full bg-elevated border border-app flex items-center justify-center text-secondary hover:text-accent hover:border-accent transition"
+                aria-label="Reading list"
               >
-                <FiBell size={18} />
-              </button>
+                <FiBookmark size={18} />
+                {bookmarks.length > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-accent text-white text-[10px] font-bold flex items-center justify-center">
+                    {bookmarks.length > 9 ? "9+" : bookmarks.length}
+                  </span>
+                )}
+              </Link>
               <Link
                 to="/profile"
                 className="w-9 h-9 rounded-full overflow-hidden border-2 border-accent ring-2 ring-transparent hover:ring-[var(--accent-soft)] transition"
@@ -81,10 +89,9 @@ const NavBar = () => {
               </Link>
               <button
                 onClick={() => logout()}
-                className="hidden lg:flex items-center gap-2 bg-surface border border-app text-app text-sm font-medium px-4 py-2 rounded-full hover:bg-elevated transition"
+                className="hidden lg:block text-sm text-muted hover:text-app transition px-3"
               >
-                <FiPhone size={14} />
-                Profile
+                Log out
               </button>
             </>
           ) : (
@@ -92,8 +99,7 @@ const NavBar = () => {
               to="/auth"
               className="flex items-center gap-2 bg-surface border border-app text-app text-sm font-medium px-4 py-2.5 rounded-full hover:bg-elevated transition shadow-app"
             >
-              <FiPhone size={14} />
-              <span className="hidden sm:inline">Sign In</span>
+              Sign In
             </Link>
           )}
         </div>

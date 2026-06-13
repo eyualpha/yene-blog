@@ -1,14 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { FiArrowLeft, FiCalendar, FiEye, FiHeart } from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 import { useBlogs } from "../context/BlogContext";
-import { getBlogById } from "../services/blogService";
+import { getBlogById, incrementBlogViews } from "../services/blogService";
 import { subscribeToComments, addComment } from "../services/commentService";
 import { formatDate } from "../utils/formatDate";
 import { getReadingTime } from "../utils/readingTime";
-import { getCategoryStyle } from "../utils/categoryImages";
+import { getRelatedArticles, BLOG_STATUS } from "../utils/blogFeatures";
+import BlogCover from "../components/BlogCover";
+import BookmarkButton from "../components/BookmarkButton";
+import ShareButton from "../components/ShareButton";
+import ReadingProgress from "../components/ReadingProgress";
+import RelatedArticles from "../components/RelatedArticles";
 import LoadingSpinner from "../components/LoadingSpinner";
 import Toast from "../components/Toast";
 import Footer from "../components/Footer";
@@ -17,7 +22,7 @@ const BlogDetail = () => {
   const navigate = useNavigate();
   const { id: blogId } = useParams();
   const { user } = useAuth();
-  const { handleLike } = useBlogs();
+  const { handleLike, allBlogsRaw } = useBlogs();
   const [blog, setBlog] = useState(null);
   const [commentList, setCommentList] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -25,6 +30,18 @@ const BlogDetail = () => {
   const [submitting, setSubmitting] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [toast, setToast] = useState({ message: "", type: "error" });
+
+  const relatedArticles = useMemo(
+    () => getRelatedArticles(blog, allBlogsRaw),
+    [blog, allBlogsRaw]
+  );
+
+  useEffect(() => {
+    document.title = blog?.title ? `${blog.title} — YeneBlog` : "YeneBlog";
+    return () => {
+      document.title = "YeneBlog";
+    };
+  }, [blog?.title]);
 
   useEffect(() => {
     const fetchBlog = async () => {
@@ -34,6 +51,14 @@ const BlogDetail = () => {
         setBlog(blogData);
         if (blogData && user) {
           setIsLiked(blogData.likedBy?.includes(user.uid) || false);
+        }
+        if (blogData && blogData.status !== BLOG_STATUS.DRAFT) {
+          const counted = await incrementBlogViews(blogId);
+          if (counted) {
+            setBlog((prev) =>
+              prev ? { ...prev, views: (prev.views || 0) + 1 } : prev
+            );
+          }
         }
       } catch (err) {
         console.error("Error fetching blog:", err);
@@ -122,10 +147,22 @@ const BlogDetail = () => {
     );
   }
 
-  const style = getCategoryStyle(blog.category);
+  const isOwner = user?.uid === blog.userId;
+  const isDraft = blog.status === BLOG_STATUS.DRAFT;
+
+  if (isDraft && !isOwner) {
+    return (
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-app gap-4 pt-20">
+        <p className="text-xl text-app">This article is not published yet.</p>
+        <Link to="/" className="text-accent hover:underline">Back to home</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full bg-app min-h-screen pt-24 pb-8">
+      <ReadingProgress />
+
       <div className="max-w-3xl mx-auto px-4">
         <Link
           to="/"
@@ -134,24 +171,50 @@ const BlogDetail = () => {
           <FiArrowLeft size={16} /> Back to articles
         </Link>
 
-        <div
-          className={`relative h-56 md:h-72 rounded-3xl bg-gradient-to-br ${style.gradient} flex items-center justify-center mb-8 overflow-hidden shadow-app-lg`}
-        >
-          <span className="text-8xl opacity-30 select-none">{style.emoji}</span>
-          {blog.category && (
-            <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/30 backdrop-blur-sm text-white text-xs font-medium">
-              {blog.category}
-            </span>
-          )}
+        <div className="relative mb-8">
+          <BlogCover
+            blog={blog}
+            className="h-56 md:h-80 rounded-3xl shadow-app-lg"
+            showAuthor={false}
+            overlay="light"
+          />
+          <div className="absolute top-4 right-4 flex gap-2 z-10">
+            <BookmarkButton blog={blog} />
+            <ShareButton title={blog.title} />
+          </div>
         </div>
 
         <article className="bg-card rounded-3xl border border-app shadow-app p-6 md:p-10">
+          <div className="flex flex-wrap gap-2 mb-4">
+            {blog.category && (
+              <span className="text-xs font-medium px-3 py-1 rounded-full bg-accent-soft text-accent">
+                {blog.category}
+              </span>
+            )}
+            {isDraft && (
+              <span className="text-xs font-medium px-3 py-1 rounded-full bg-amber-500/20 text-amber-500">
+                Draft — only you can see this
+              </span>
+            )}
+            {blog.tags?.map((tag) => (
+              <span
+                key={tag}
+                className="text-xs font-medium px-3 py-1 rounded-full bg-elevated text-secondary"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+
           <h1 className="text-3xl md:text-4xl font-bold text-app mb-6 leading-tight">
             {blog.title}
           </h1>
 
           <div className="flex flex-wrap items-center gap-4 mb-8 pb-6 border-b border-app">
-            <div className="flex items-center gap-3">
+            <Link
+              to={`/author/${blog.authorId || blog.userId}`}
+              className="flex items-center gap-3 hover:opacity-80 transition"
+            >
               <img
                 src={blog.authorPhoto || "https://api.dicebear.com/7.x/avataaars/svg?seed=author"}
                 alt={blog.author}
@@ -167,12 +230,12 @@ const BlogDetail = () => {
                   <span>{getReadingTime(blog.detail)}</span>
                 </div>
               </div>
-            </div>
+            </Link>
 
             <div className="flex items-center gap-3 ml-auto">
               <span className="flex items-center gap-1.5 text-muted text-sm">
                 <FiEye size={14} />
-                {blog.likes || 0}
+                {blog.views || 0} views
               </span>
               <button
                 onClick={onLike}
@@ -192,7 +255,9 @@ const BlogDetail = () => {
             {blog.detail}
           </div>
 
-          <section className="bg-elevated rounded-2xl p-5 md:p-6 border border-app">
+          <RelatedArticles articles={relatedArticles} />
+
+          <section className="bg-elevated rounded-2xl p-5 md:p-6 border border-app mt-10">
             <h2 className="text-xl font-bold text-app mb-5">
               Comments ({commentList.length})
             </h2>

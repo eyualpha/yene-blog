@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useBlogs } from "../context/BlogContext";
 import { BLOG_CATEGORIES } from "../constants/blogCategories";
+import { BLOG_STATUS, parseTags, formatTagsForInput } from "../utils/blogFeatures";
 import BlogCard from "../components/BlogCard";
+import ImageUpload from "../components/ImageUpload";
 import LoadingSpinner from "../components/LoadingSpinner";
 import Toast from "../components/Toast";
 import Footer from "../components/Footer";
@@ -23,15 +25,42 @@ const UserProfile = () => {
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [category, setCategory] = useState("Technology");
+  const [tagsInput, setTagsInput] = useState("");
+  const [status, setStatus] = useState(BLOG_STATUS.PUBLISHED);
+  const [coverFile, setCoverFile] = useState(null);
+  const [coverPreview, setCoverPreview] = useState("");
+  const [removeCover, setRemoveCover] = useState(false);
+  const [imageError, setImageError] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [toast, setToast] = useState({ message: "", type: "error" });
 
   const resetForm = () => {
     setTitle("");
     setDetail("");
     setCategory("Technology");
+    setTagsInput("");
+    setStatus(BLOG_STATUS.PUBLISHED);
+    setCoverFile(null);
+    setCoverPreview("");
+    setRemoveCover(false);
+    setImageError("");
     setEditingId(null);
+  };
+
+  const handleFileSelect = (file, error) => {
+    setImageError(error || "");
+    if (error) return;
+    setCoverFile(file);
+    setRemoveCover(false);
+  };
+
+  const handleRemoveCover = () => {
+    setCoverFile(null);
+    setCoverPreview("");
+    setRemoveCover(true);
+    setImageError("");
   };
 
   const handleSubmit = async () => {
@@ -41,12 +70,17 @@ const UserProfile = () => {
     }
 
     setSubmitting(true);
+    setUploading(Boolean(coverFile));
     try {
       if (editingId) {
         await handleUpdateBlog(editingId, {
           title: title.trim(),
           detail: detail.trim(),
           category,
+          tags: parseTags(tagsInput),
+          status,
+          coverFile,
+          removeCover,
         });
         setToast({ message: "Article updated!", type: "success" });
       } else {
@@ -54,15 +88,25 @@ const UserProfile = () => {
           title: title.trim(),
           detail: detail.trim(),
           category,
+          tags: parseTags(tagsInput),
+          status,
+          coverFile,
         });
-        setToast({ message: "Article published!", type: "success" });
+        setToast({
+          message: status === BLOG_STATUS.DRAFT ? "Draft saved!" : "Article published!",
+          type: "success",
+        });
       }
       resetForm();
     } catch (err) {
       console.error("Error saving blog:", err);
-      setToast({ message: "Failed to save article.", type: "error" });
+      setToast({
+        message: err.message || "Failed to save article.",
+        type: "error",
+      });
     } finally {
       setSubmitting(false);
+      setUploading(false);
     }
   };
 
@@ -71,6 +115,12 @@ const UserProfile = () => {
     setTitle(blog.title);
     setDetail(blog.detail);
     setCategory(blog.category || "Technology");
+    setTagsInput(formatTagsForInput(blog.tags));
+    setStatus(blog.status || BLOG_STATUS.PUBLISHED);
+    setCoverFile(null);
+    setCoverPreview(blog.coverImage || "");
+    setRemoveCover(false);
+    setImageError("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -126,6 +176,15 @@ const UserProfile = () => {
           </p>
 
           <div className="flex flex-col gap-4 max-w-2xl">
+            <ImageUpload
+              file={coverFile}
+              previewUrl={!removeCover ? coverPreview : ""}
+              onFileSelect={handleFileSelect}
+              onRemove={handleRemoveCover}
+              disabled={submitting}
+              error={imageError}
+            />
+
             <input
               type="text"
               value={title}
@@ -144,6 +203,37 @@ const UserProfile = () => {
                 </option>
               ))}
             </select>
+            <input
+              type="text"
+              value={tagsInput}
+              placeholder="Tags (comma separated, e.g. react, firebase, tutorial)"
+              onChange={(e) => setTagsInput(e.target.value)}
+              className="w-full px-4 py-3.5 bg-input border border-app rounded-2xl text-app placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-[var(--accent)] transition"
+            />
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setStatus(BLOG_STATUS.PUBLISHED)}
+                className={`flex-1 py-3 rounded-2xl text-sm font-semibold border transition ${
+                  status === BLOG_STATUS.PUBLISHED
+                    ? "bg-accent text-white border-accent"
+                    : "border-app text-secondary hover:text-app"
+                }`}
+              >
+                Publish
+              </button>
+              <button
+                type="button"
+                onClick={() => setStatus(BLOG_STATUS.DRAFT)}
+                className={`flex-1 py-3 rounded-2xl text-sm font-semibold border transition ${
+                  status === BLOG_STATUS.DRAFT
+                    ? "bg-amber-500 text-white border-amber-500"
+                    : "border-app text-secondary hover:text-app"
+                }`}
+              >
+                Save as Draft
+              </button>
+            </div>
             <textarea
               value={detail}
               placeholder="Write your article content..."
@@ -157,7 +247,15 @@ const UserProfile = () => {
                 disabled={submitting}
                 className="px-8 py-3 bg-accent hover-accent text-white font-semibold rounded-2xl transition disabled:opacity-50 hover:scale-[1.02]"
               >
-                {submitting ? "Saving..." : editingId ? "Update Article" : "Publish Article"}
+                {submitting
+                  ? uploading
+                    ? "Uploading image..."
+                    : "Saving..."
+                  : editingId
+                    ? "Update Article"
+                    : status === BLOG_STATUS.DRAFT
+                      ? "Save Draft"
+                      : "Publish Article"}
               </button>
               {editingId && (
                 <button

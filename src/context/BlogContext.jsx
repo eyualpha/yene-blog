@@ -9,12 +9,18 @@ import {
 import {
   createBlog,
   deleteBlog,
+  getBlogById,
   subscribeToBlogs,
   toggleBlogLike,
   updateBlog,
 } from "../services/blogService";
+import { uploadBlogCover, deleteBlogCover } from "../services/imageService";
 import { useAuth } from "./AuthContext";
 import { SORT_OPTIONS } from "../constants/blogCategories";
+import { BLOG_STATUS } from "../utils/blogFeatures";
+
+const isPublished = (blog) =>
+  !blog.status || blog.status === BLOG_STATUS.PUBLISHED;
 
 const BlogContext = createContext(null);
 
@@ -25,6 +31,7 @@ export const BlogProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [tagFilter, setTagFilter] = useState("");
   const [sortBy, setSortBy] = useState(SORT_OPTIONS.NEWEST);
 
   useEffect(() => {
@@ -45,7 +52,7 @@ export const BlogProvider = ({ children }) => {
   }, []);
 
   const filteredBlogs = useMemo(() => {
-    let result = [...blogs];
+    let result = blogs.filter(isPublished);
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -53,7 +60,8 @@ export const BlogProvider = ({ children }) => {
         (blog) =>
           blog.title?.toLowerCase().includes(query) ||
           blog.detail?.toLowerCase().includes(query) ||
-          blog.author?.toLowerCase().includes(query)
+          blog.author?.toLowerCase().includes(query) ||
+          blog.tags?.some((t) => t.includes(query))
       );
     }
 
@@ -61,9 +69,13 @@ export const BlogProvider = ({ children }) => {
       result = result.filter((blog) => blog.category === categoryFilter);
     }
 
+    if (tagFilter) {
+      result = result.filter((blog) => blog.tags?.includes(tagFilter));
+    }
+
     switch (sortBy) {
       case SORT_OPTIONS.POPULAR:
-        result.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+        result.sort((a, b) => (b.views || 0) - (a.views || 0) || (b.likes || 0) - (a.likes || 0));
         break;
       case SORT_OPTIONS.OLDEST:
         result.reverse();
@@ -73,7 +85,9 @@ export const BlogProvider = ({ children }) => {
     }
 
     return result;
-  }, [blogs, searchQuery, categoryFilter, sortBy]);
+  }, [blogs, searchQuery, categoryFilter, tagFilter, sortBy]);
+
+  const publishedBlogs = useMemo(() => blogs.filter(isPublished), [blogs]);
 
   const userBlogs = useMemo(
     () => (user ? blogs.filter((blog) => blog.userId === user.uid) : []),
@@ -96,35 +110,78 @@ export const BlogProvider = ({ children }) => {
   );
 
   const handleCreateBlog = useCallback(
-    async ({ title, detail, category }) => {
+    async ({ title, detail, category, coverFile, tags, status }) => {
       if (!user) throw new Error("You must be logged in to publish.");
-      await createBlog({
+
+      const blogId = await createBlog({
         title,
         detail,
         category: category || "Other",
+        tags: tags || [],
+        status: status || BLOG_STATUS.PUBLISHED,
         userId: user.uid,
         author: user.displayName || "Anonymous",
         authorId: user.uid,
         authorPhoto: user.photoURL || "",
         authorEmail: user.email || "",
       });
+
+      if (coverFile) {
+        const { url, publicId } = await uploadBlogCover(coverFile, user.uid, blogId);
+        await updateBlog(blogId, {
+          coverImage: url,
+          coverImagePublicId: publicId,
+          coverImagePath: "",
+        });
+      }
+
+      return blogId;
     },
     [user]
   );
 
-  const handleUpdateBlog = useCallback(async (blogId, updates) => {
-    await updateBlog(blogId, updates);
-  }, []);
+  const handleUpdateBlog = useCallback(
+    async (blogId, { title, detail, category, coverFile, removeCover, tags, status }) => {
+      const existing = blogs.find((b) => b.id === blogId) || (await getBlogById(blogId));
+      const updates = { title, detail, category };
+      if (tags !== undefined) updates.tags = tags;
+      if (status !== undefined) updates.status = status;
+
+      if (removeCover) {
+        await deleteBlogCover();
+        updates.coverImage = "";
+        updates.coverImagePublicId = "";
+        updates.coverImagePath = "";
+      }
+
+      if (coverFile) {
+        await deleteBlogCover();
+        const { url, publicId } = await uploadBlogCover(
+          coverFile,
+          existing?.userId || user.uid,
+          blogId
+        );
+        updates.coverImage = url;
+        updates.coverImagePublicId = publicId;
+        updates.coverImagePath = "";
+      }
+
+      await updateBlog(blogId, updates);
+    },
+    [blogs, user]
+  );
 
   const handleDeleteBlog = useCallback(async (blogId) => {
-    await deleteBlog(blogId);
-  }, []);
+      await deleteBlogCover();
+      await deleteBlog(blogId);
+    }, []);
 
   return (
     <BlogContext.Provider
       value={{
         blogs: filteredBlogs,
-        allBlogs: blogs,
+        allBlogs: publishedBlogs,
+        allBlogsRaw: blogs,
         userBlogs,
         loading,
         error,
@@ -132,6 +189,8 @@ export const BlogProvider = ({ children }) => {
         setSearchQuery,
         categoryFilter,
         setCategoryFilter,
+        tagFilter,
+        setTagFilter,
         sortBy,
         setSortBy,
         handleLike,
