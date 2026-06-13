@@ -15,6 +15,7 @@ import {
   updateBlog,
 } from "../services/blogService";
 import { uploadBlogCover, deleteBlogCover } from "../services/imageService";
+import { recordPublishActivity } from "../services/authorStatsService";
 import { useAuth } from "./AuthContext";
 import { SORT_OPTIONS } from "../constants/blogCategories";
 import { BLOG_STATUS } from "../utils/blogFeatures";
@@ -135,7 +136,15 @@ export const BlogProvider = ({ children }) => {
         });
       }
 
-      return blogId;
+      let reward = null;
+      if ((status || BLOG_STATUS.PUBLISHED) === BLOG_STATUS.PUBLISHED) {
+        reward = await recordPublishActivity(user.uid, {
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+        });
+      }
+
+      return { blogId, reward };
     },
     [user]
   );
@@ -167,6 +176,18 @@ export const BlogProvider = ({ children }) => {
       }
 
       await updateBlog(blogId, updates);
+
+      let reward = null;
+      const wasDraft = existing?.status === BLOG_STATUS.DRAFT;
+      const nowPublished = (status ?? existing?.status) === BLOG_STATUS.PUBLISHED;
+      if (wasDraft && nowPublished) {
+        reward = await recordPublishActivity(existing?.userId || user.uid, {
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+        });
+      }
+
+      return { reward };
     },
     [blogs, user]
   );

@@ -10,6 +10,9 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import Toast from "../components/Toast";
 import Footer from "../components/Footer";
 import ThemeToggle from "../components/ThemeToggle";
+import AuthorStatsPanel from "../components/AuthorStatsPanel";
+import { useAuthorStats } from "../hooks/useAuthorStats";
+import { formatRewardMessage } from "../utils/authorGamification";
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -21,6 +24,7 @@ const UserProfile = () => {
     handleUpdateBlog,
     handleDeleteBlog,
   } = useBlogs();
+  const { stats, loading: statsLoading } = useAuthorStats(user?.uid);
 
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
@@ -72,8 +76,10 @@ const UserProfile = () => {
     setSubmitting(true);
     setUploading(Boolean(coverFile));
     try {
+      let reward = null;
+
       if (editingId) {
-        await handleUpdateBlog(editingId, {
+        const result = await handleUpdateBlog(editingId, {
           title: title.trim(),
           detail: detail.trim(),
           category,
@@ -82,9 +88,13 @@ const UserProfile = () => {
           coverFile,
           removeCover,
         });
-        setToast({ message: "Article updated!", type: "success" });
+        reward = result?.reward;
+        const msg = reward
+          ? `Article published! ${formatRewardMessage(reward)}`
+          : "Article updated!";
+        setToast({ message: msg, type: "success" });
       } else {
-        await handleCreateBlog({
+        const result = await handleCreateBlog({
           title: title.trim(),
           detail: detail.trim(),
           category,
@@ -92,8 +102,12 @@ const UserProfile = () => {
           status,
           coverFile,
         });
+        reward = result?.reward;
+        const baseMsg =
+          status === BLOG_STATUS.DRAFT ? "Draft saved!" : "Article published!";
+        const rewardMsg = formatRewardMessage(reward);
         setToast({
-          message: status === BLOG_STATUS.DRAFT ? "Draft saved!" : "Article published!",
+          message: rewardMsg ? `${baseMsg} ${rewardMsg}` : baseMsg,
           type: "success",
         });
       }
@@ -165,6 +179,10 @@ const UserProfile = () => {
               Log Out
             </button>
           </div>
+        </div>
+
+        <div className="mb-8">
+          <AuthorStatsPanel stats={stats} loading={statsLoading} />
         </div>
 
         <div className="bg-card rounded-3xl border border-app shadow-app p-6 md:p-8 mb-10">

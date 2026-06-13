@@ -6,6 +6,7 @@ import { formatDate } from "../utils/formatDate";
 import { BLOG_STATUS } from "../utils/blogFeatures";
 import BlogCover from "./BlogCover";
 import BookmarkButton from "./BookmarkButton";
+import AuthorBadge from "./AuthorBadge";
 
 const truncateText = (text, maxLength) => {
   if (!text) return "";
@@ -99,9 +100,10 @@ const ArticleCard = ({ blog, isHighlighted, showActions, onEdit, onDelete }) => 
 
         <Link
           to={authorLink}
-          className="text-xs text-muted hover:text-accent transition mb-3"
+          className="text-xs text-muted hover:text-accent transition mb-3 inline-flex items-center"
         >
           by {blog.author}
+          <AuthorBadge authorId={blog.authorId || blog.userId} />
         </Link>
 
         <div className="flex items-center gap-4 text-muted text-xs mt-auto mb-4">

@@ -11,6 +11,7 @@ import { getReadingTime } from "../utils/readingTime";
 import { getRelatedArticles, BLOG_STATUS } from "../utils/blogFeatures";
 import BlogCover from "../components/BlogCover";
 import BookmarkButton from "../components/BookmarkButton";
+import AuthorBadge from "../components/AuthorBadge";
 import ShareButton from "../components/ShareButton";
 import ReadingProgress from "../components/ReadingProgress";
 import RelatedArticles from "../components/RelatedArticles";
@@ -221,7 +222,10 @@ const BlogDetail = () => {
                 className="w-11 h-11 rounded-full object-cover border-2 border-app"
               />
               <div>
-                <p className="text-app font-semibold">{blog.author}</p>
+                <p className="text-app font-semibold inline-flex items-center">
+                  {blog.author}
+                  <AuthorBadge authorId={blog.authorId || blog.userId} />
+                </p>
                 <div className="flex items-center gap-3 text-muted text-xs mt-0.5">
                   <span className="flex items-center gap-1">
                     <FiCalendar size={12} />

@@ -8,6 +8,7 @@ import HeroSection from "../components/HeroSection";
 import Footer, { Pagination } from "../components/Footer";
 import Newsletter from "../components/Newsletter";
 import TrendingTags from "../components/TrendingTags";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { ARTICLES_PER_PAGE } from "../constants/blogCategories";
 
 const HomePage = () => {

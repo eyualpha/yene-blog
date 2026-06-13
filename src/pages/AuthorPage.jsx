@@ -5,6 +5,8 @@ import { useBlogs } from "../context/BlogContext";
 import { BLOG_STATUS } from "../utils/blogFeatures";
 import BlogCard from "../components/BlogCard";
 import LoadingSpinner from "../components/LoadingSpinner";
+import AuthorStatsPanel from "../components/AuthorStatsPanel";
+import { useAuthorStats } from "../hooks/useAuthorStats";
 import Footer from "../components/Footer";
 
 const AuthorPage = () => {
@@ -22,6 +24,7 @@ const AuthorPage = () => {
   );
 
   const author = authorArticles[0];
+  const { stats, loading: statsLoading } = useAuthorStats(authorId);
 
   if (loading) {
     return (
@@ -42,20 +45,25 @@ const AuthorPage = () => {
         </Link>
 
         {author ? (
-          <div className="flex items-center gap-5 mb-10 p-6 bg-card rounded-3xl border border-app shadow-app">
-            <img
-              src={author.authorPhoto || "https://api.dicebear.com/7.x/avataaars/svg?seed=author"}
-              alt={author.author}
-              className="w-20 h-20 rounded-full object-cover border-2 border-accent"
-            />
-            <div>
-              <h1 className="text-2xl font-bold text-app">{author.author}</h1>
-              <p className="text-muted text-sm mt-1">{author.authorEmail}</p>
-              <p className="text-secondary text-sm mt-2">
-                {authorArticles.length} published article{authorArticles.length !== 1 ? "s" : ""}
-              </p>
+          <>
+            <div className="flex items-center gap-5 mb-6 p-6 bg-card rounded-3xl border border-app shadow-app">
+              <img
+                src={author.authorPhoto || "https://api.dicebear.com/7.x/avataaars/svg?seed=author"}
+                alt={author.author}
+                className="w-20 h-20 rounded-full object-cover border-2 border-accent"
+              />
+              <div>
+                <h1 className="text-2xl font-bold text-app">{author.author}</h1>
+                <p className="text-muted text-sm mt-1">{author.authorEmail}</p>
+                <p className="text-secondary text-sm mt-2">
+                  {authorArticles.length} published article{authorArticles.length !== 1 ? "s" : ""}
+                </p>
+              </div>
             </div>
-          </div>
+            <div className="mb-10">
+              <AuthorStatsPanel stats={stats} loading={statsLoading} />
+            </div>
+          </>
         ) : (
           <p className="text-app text-xl mb-8">Author not found.</p>
         )}
