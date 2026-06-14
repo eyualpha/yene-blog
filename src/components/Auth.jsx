@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
 } from "firebase/auth";
 import { auth, googleProvider } from "../config/firebase";
 import { FcGoogle } from "react-icons/fc";
@@ -18,16 +20,30 @@ const Auth = () => {
   const [termChecked, setTermChecked] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) navigate("/");
+      })
+      .catch((err) => {
+        console.error("Google redirect sign-in error:", err);
+        setError("Failed to sign in with Google.");
+      });
+  }, [navigate]);
+
   const signInWithGoogle = async () => {
     setError("");
     setLoading(true);
     try {
-      await signInWithPopup(auth, googleProvider);
-      navigate("/");
+      if (import.meta.env.PROD) {
+        await signInWithRedirect(auth, googleProvider);
+      } else {
+        await signInWithPopup(auth, googleProvider);
+        navigate("/");
+      }
     } catch (err) {
       setError("Failed to sign in with Google.");
       console.error(err);
-    } finally {
       setLoading(false);
     }
   };

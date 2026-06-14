@@ -57,8 +57,19 @@ const ImageUpload = ({
 
       {!configured && !configError && (
         <p className="text-xs text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2 mb-3">
-          Add Cloudinary keys to <code className="text-accent">.env</code> to enable uploads.
-          See <code className="text-accent">.env.example</code> for setup steps.
+          {import.meta.env.PROD ? (
+            <>
+              Image uploads are not configured on this deployment. Add{" "}
+              <code className="text-accent">VITE_CLOUDINARY_CLOUD_NAME</code> and{" "}
+              <code className="text-accent">VITE_CLOUDINARY_UPLOAD_PRESET</code> in your
+              Vercel project settings, then redeploy.
+            </>
+          ) : (
+            <>
+              Add Cloudinary keys to <code className="text-accent">.env</code> to enable
+              uploads. See <code className="text-accent">.env.example</code>.
+            </>
+          )}
         </p>
       )}
 
