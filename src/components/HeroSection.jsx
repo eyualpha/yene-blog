@@ -78,7 +78,7 @@ const HeroSection = ({
         <div className="max-w-3xl">
           <h1 className="hero-title">
             Discover{" "}
-            <span className="hero-gradient-text">Nice Articles</span>
+            <span className="hero-accent-text">Nice Articles</span>
             <br className="hidden sm:block" />
             {" "}Here
           </h1>
